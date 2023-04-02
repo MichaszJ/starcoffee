@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu2/index.html</loc>
+    <loc>https://tlienart.github.io/FranklinTemplates.jl/posts/welcome-to-star-coffee/index.html</loc>
     <lastmod>2023-04-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -14,13 +14,7 @@
     <priority>0.5</priority>
 </url>
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu1/index.html</loc>
-    <lastmod>2023-04-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu3/index.html</loc>
+    <loc>https://tlienart.github.io/FranklinTemplates.jl/posts/getting-started-on-sat/index.html</loc>
     <lastmod>2023-04-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
