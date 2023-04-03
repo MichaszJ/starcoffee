@@ -1,7 +1,5 @@
 # The Direct Shooting Method
 
-@def reeval = true
-
 _April 3rd, 2023_
 @@im-100
 ![](https://source.unsplash.com/a2PfxRXCYQM)
@@ -22,7 +20,7 @@ $$
 F(a) = y(t_{1}; a) - y_{1}
 $$
 
-Where $a$ is the initial condition and $y_1$ is the target value. If the notation is unclear, you can think of $ y(t\_{1}; a)$ as the value of $y$ at time $t_f$ given initial condition $a$. See the Wikipedia article linked above if you'd like a more rigorous explanation.
+Where $a$ is the initial condition and $y_1$ is the target value. If the notation is unclear, you can think of $y(t_{1}; a)$ as the value of $y$ at time $t_1$ given initial condition $a$. See the Wikipedia article linked above if you'd like a more rigorous explanation.
 
 There are various numerical methods to find roots, in this case I went with Newton's method. This is an iterative method, starting with an initial guess of the root $a_n$. The method converges upon a root with the following iterative step:
 
@@ -36,7 +34,7 @@ $$
 \mathbf{a}_{n+1} = \mathbf{a}_{n} - \mathbf{J}^{-1} F(\mathbf{a}_{n})
 $$
 
-Where $\mathbf{J}$ is the Jacobian matrix of $f(\mathbf{x}_{n})$, which is defined as:
+Where $\mathbf{J}$ is the Jacobian matrix of $F(\mathbf{a}_{n})$, which is defined as:
 
 $$
 \mathbf{J} = \begin{bmatrix}
