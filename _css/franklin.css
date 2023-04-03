@@ -217,7 +217,7 @@ td {
 }
 
 .franklin-content a {
-  color: #f67280;
+  color: #27a573;
   text-decoration: none;
 }
 
@@ -386,4 +386,14 @@ code {
 .im-100 img {
   padding: 0;
   width: 100%;
+}
+
+.im-75 {
+  text-align: center;
+}
+.im-75 img {
+  padding: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
 }
