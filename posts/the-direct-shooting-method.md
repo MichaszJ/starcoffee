@@ -88,7 +88,7 @@ For this example, $y(t_{f}; \dot{y}_{0}) - y_{t}$ simplifies to zero since no ma
 Importing required libraries:
 
 ```julia:imports
-import Pkg; Pkg.add("Plots", "Zygote") # hide
+import Pkg; Pkg.add(["Plots", "Zygote"]) # hide
 using Plots, Zygote, LinearAlgebra
 ```
 
