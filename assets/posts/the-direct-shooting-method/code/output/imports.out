@@ -1,2 +1,3 @@
-ArgumentError: Package Plots not found in current path.
-- Run `import Pkg; Pkg.add("Plots")` to install the Plots package.
+MethodError: no method matching add(::String, ::String)
+Closest candidates are:
+  add(::Union{AbstractString, Pkg.Types.PackageSpec}; kwargs...) at /opt/hostedtoolcache/julia/1.8.5/x64/share/julia/stdlib/v1.8/Pkg/src/API.jl:143
