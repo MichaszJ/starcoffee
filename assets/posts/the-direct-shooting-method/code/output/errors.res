@@ -1,1 +1,1 @@
-nothing
+"/home/runner/work/starcoffee/starcoffee/__site/assets/posts/the-direct-shooting-method/code/output/errors.svg"
