@@ -6,6 +6,7 @@ Welcome to Star Coffee, this site serves as my place to document work on project
 
 # Posts
 
+- [SAT Work Log 2](/posts/sat-work-log-2/) - April 4th, 2023
 - [The Direct Shooting Method](/posts/the-direct-shooting-method/) - April 3rd, 2023
 - [Getting Started on SAT](/posts/getting-started-on-sat/) - April 2nd, 2023
 - [Welcome to Star Coffee](/posts/welcome-to-star-coffee/) - April 2nd, 2023

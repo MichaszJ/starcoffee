@@ -1,6 +1,9 @@
 # The Direct Shooting Method
 
 _April 3rd, 2023_
+
+\tableofcontents
+
 @@im-100
 ![](https://source.unsplash.com/a2PfxRXCYQM)
 @@
@@ -96,10 +99,10 @@ using Plots, Zygote, LinearAlgebra
 Defining constants and initial conditions:
 
 ```julia:consts
-g = 9.80665
-ẋ₀ = 15.0
-ẏ₀ = 15.0
-target = [200, 0]
+const g = 9.80665
+const ẋ₀ = 15.0
+const ẏ₀ = 15.0
+const target = [200, 0]
 ```
 
 Defining the $\mathbf{F}$ matrix:

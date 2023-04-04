@@ -10,7 +10,7 @@ The majority of the code, at least in the short-term, will be mainly based off o
 
 ## The Progress So Far
 
-So far I have built an interactive `Makie.jl` visualization called [OrbitTool.jl](https://github.com/MichaszJ/satellite-analysis-toolkit/blob/main/src/OrbitTool.jl) for visualizing a satellite's orbit around the Earth and its ground tracks. The orbit is plotted in an [ECI reference frame](https://en.wikipedia.org/wiki/Earth-centered_inertial), and the ground track plot has a setting to change the projection being used.
+So far I have built an interactive `Makie.jl` visualization called [OrbitTool.jl](https://github.com/MichaszJ/satellite-analysis-toolkit/blob/main/src/GroundTracker.jl) for visualizing a satellite's orbit around the Earth and its ground tracks. The orbit is plotted in an [ECI reference frame](https://en.wikipedia.org/wiki/Earth-centered_inertial), and the ground track plot has a setting to change the projection being used.
 
 \fig{orbit-plot.png}
 
