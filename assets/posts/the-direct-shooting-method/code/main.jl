@@ -22,7 +22,6 @@ for i in 1:6
 
     global un = un - pinv(DF)*F_mat
 
-
     global impact_time = 2*un[2]/g
     global times = 0.0:0.01:impact_time
 
