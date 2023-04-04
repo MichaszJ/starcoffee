@@ -6,9 +6,13 @@ _April 3rd, 2023_
 @@
 
 <!-- prettier-ignore -->
-~~~
+<!-- ~~~
 <p style="color:#808080; text-align:center; font-size: medium;">Photo by <a href="https://unsplash.com/photos/a2PfxRXCYQM">Maxence Pira</a></p>
-~~~
+~~~ -->
+
+@@img-caption
+Photo by [Maxence Pira](https://unsplash.com/photos/a2PfxRXCYQM)
+@@
 
 Following graduation, I have been interested in learning a variety of different topics, one being [optimal control](https://en.wikipedia.org/wiki/Optimal_control). It's a pretty complex topic that I've been struggling to understand for a while, especially with being able to apply the theoretical concepts I've been reading about. At this point however I feel ready to cover some simple ideas in optimal control, the first being the direct shooting method.
 
@@ -86,7 +90,6 @@ For this example, $y(t_{f}; \dot{y}_{0}) - y_{t}$ simplifies to zero since no ma
 Importing required libraries:
 
 ```julia:imports
-import Pkg; Pkg.add(["Plots", "Zygote"]) # hide
 using Plots, Zygote, LinearAlgebra
 ```
 
@@ -140,7 +143,6 @@ for i in 1:6
     DF = jacobian(F, un)[1]
 
     global un = un - pinv(DF)*F_mat
-
 
     global impact_time = 2*un[2]/g
     global times = 0.0:0.01:impact_time

@@ -1,13 +1,18 @@
+@font-face {
+  font-family: JuliaMono;
+  src: url("https://cdn.jsdelivr.net/gh/cormullion/juliamono/webfonts/JuliaMono-Regular.woff2");
+}
+
 /* ==================================================================
     VARIABLES
 ================================================================== */
 
 :root {
-  --block-background: hsl(0, 0%, 94%);
-  --output-background: hsl(0, 0%, 98%);
+  --block-background: hsl(0, 0%, 98%);
+  --output-background: hsl(0, 0%, 94%);
   --small: 14px;
   --normal: 19px;
-  --text-color: hsv(0, 0%, 20%);
+  --text-color: hsl(0, 0%, 20%);
 }
 
 /* ==================================================================
@@ -15,7 +20,7 @@
 ================================================================== */
 
 html {
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: Helvetica, Arial, sans-serif !important;
   font-size: var(--normal);
   color: var(--text-color);
 }
@@ -324,7 +329,8 @@ body {
 ================================================================== */
 
 code {
-  background-color: var(--block-background);
+  font-family: JuliaMono;
+  background-color: var(--block-background) !important;
   padding: 0.1em 0.2em;
   border-radius: 2px;
   font-size: var(--small);
@@ -358,8 +364,8 @@ code {
 }
 
 .code-output {
-  background: var(--output-background);
-  border: 1px dashed #dbdbdb;
+  background: var(--output-background) !important;
+  border: 1px dashed #dbdbdb !important;
 }
 
 /* ==================================================================
@@ -396,4 +402,16 @@ code {
   margin-left: auto;
   margin-right: auto;
   width: 75%;
+}
+
+/* code {
+  background-color: #f8f8f8 !important;
+  border: solid 1px #d9d9d9 !important;
+} */
+
+.img-caption {
+  color: #808080;
+  text-align: center;
+  font-size: medium;
+  margin-bottom: 19px;
 }
