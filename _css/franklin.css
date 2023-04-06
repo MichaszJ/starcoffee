@@ -3,6 +3,8 @@
   src: url("https://cdn.jsdelivr.net/gh/cormullion/juliamono/webfonts/JuliaMono-Regular.woff2");
 }
 
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
+
 /* ==================================================================
     VARIABLES
 ================================================================== */
@@ -20,7 +22,7 @@
 ================================================================== */
 
 html {
-  font-family: Helvetica, Arial, sans-serif !important;
+  font-family: "Open Sans", sans-serif !important;
   font-size: var(--normal);
   color: var(--text-color);
 }
@@ -113,13 +115,13 @@ html {
 ================================================================== */
 
 .franklin-content h1 {
-  font-size: 24px;
+  font-size: 30px;
 }
 .franklin-content h2 {
-  font-size: 22px;
+  font-size: 26px;
 }
 .franklin-content h3 {
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .franklin-content h1,
