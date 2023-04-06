@@ -1,0 +1,191 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/starcoffee/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/starcoffee/css/franklin.css"> <link rel=stylesheet  href="/starcoffee/css/poole_lanyon.css"> <link rel=stylesheet  href="/starcoffee/css/adjust.css"> <link rel=icon  href="/starcoffee/assets/favicon.png"> <title>Simple NN Showcase</title> <input type=checkbox  class=sidebar-checkbox  id=sidebar-checkbox > <div class=sidebar  id=sidebar > <div class=sidebar-item > <p>A theme adapted from <a href="http://lanyon.getpoole.com/" target=_blank >Lanyon</a>.</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/starcoffee/">Home</a> <a class="sidebar-nav-item " href="/starcoffee/posts/welcome-to-star-coffee/">Welcome to Star Coffee</a> <a class="sidebar-nav-item " href="/starcoffee/posts/projects/">Projects</a> <a class="sidebar-nav-item " href="/starcoffee/posts/satellite-analysis-toolkit/">Satellite Analysis Toolkit</a> <a class="sidebar-nav-item " href="/starcoffee/posts/simple-nn/">Simple NN</a> </nav> <div class=sidebar-item > <p>&copy; Michal Jagodzinski.</p> </div> </div> <!-- Wrap is the content to shift when toggling the sidebar. We wrap the content to avoid any CSS collisions with our real content. --> <div class=wrap > <div class=masthead > <div class=container > <h3 class=masthead-title > <a href="/starcoffee/" title=Home >Star Coffee</a> <small>Writing about stuff, working in public</small> </h3> </div> </div> <div class="container content"> <div class=franklin-content ><h1 id=simple_nn_showcase ><a href="#simple_nn_showcase" class=header-anchor >Simple NN Showcase</a></h1> <p><em>April 6th, 2023</em></p> <div class=franklin-toc ><ol><li><a href="#simple_example_the_xor_problem">Simple Example: The XOR Problem</a><li><a href="#comparing_optimizers">Comparing Optimizers</a><li><a href="#mnist">MNIST</a><li><a href="#wrapping_up">Wrapping Up</a></ol></div> <div class=im-100 ><img src="https://source.unsplash.com/tevq6l3Niv0" alt="" /></div> <div class=img-caption >Photo by <a href="https://unsplash.com/photos/tevq6l3Niv0">Yasintha Perera</a></div> <p><code>simple_nn</code> is a simple neural network framework, not much more to it. The functionality of <code>simple_nn</code> was inspired by <a href="https://pytorch.org/">PyTorch</a> and <a href="https://github.com/geohot/tinygrad">tinygrad</a>. I wanted the ability for low-level control of the training process, allowing users to specify exactly how their model is trained.</p> <p>I did the majority of the work for this project a couple of months ago, but I did not feel that it was complete enough to showcase on my <a href="https://michaszj.substack.com/">Substack</a>. But I do want to showcase it on here, and similar to <a href="https://michaszj.github.io/starcoffee/posts/satellite-analysis-toolkit/">SAT</a>, document the further work I do on it.</p> <h2 id=simple_example_the_xor_problem ><a href="#simple_example_the_xor_problem" class=header-anchor >Simple Example: The XOR Problem</a></h2> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> LinearAlgebra, Distributions, Plots, Random, Zygote, MLDatasets
+Random.seed!(<span class=hljs-number >69420</span>)</code></pre> <p>Defining data:</p> <pre><code class="julia hljs">data = [
+    [<span class=hljs-number >0.0</span>, <span class=hljs-number >0.0</span>],
+    [<span class=hljs-number >0.0</span>, <span class=hljs-number >1.0</span>],
+    [<span class=hljs-number >1.0</span>, <span class=hljs-number >0.0</span>],
+    [<span class=hljs-number >1.0</span>, <span class=hljs-number >1.0</span>]
+]
+
+targets = [
+    [<span class=hljs-number >0.0</span>, <span class=hljs-number >1.0</span>],
+    [<span class=hljs-number >1.0</span>, <span class=hljs-number >0.0</span>],
+    [<span class=hljs-number >1.0</span>, <span class=hljs-number >0.0</span>],
+    [<span class=hljs-number >0.0</span>, <span class=hljs-number >1.0</span>]
+]</code></pre> <p>Setting up the network and optimizer:</p> <pre><code class="julia hljs">setup = [
+    DenseLayer((<span class=hljs-number >2</span>, <span class=hljs-number >2</span>), sigmoid_activation),
+    DenseLayer((<span class=hljs-number >2</span>, <span class=hljs-number >2</span>), sigmoid_activation)
+]
+
+xor_net = CreateNetwork(setup, datatype=<span class=hljs-built_in >Float32</span>, init_distribution=Normal());
+
+OptimizerSetup!(xor_net, GradientDescentOptimizer!, learning_rate=<span class=hljs-number >0.01</span>)</code></pre> <pre><code class="plaintext hljs">Dict{String, Any} with 3 entries:
+  &quot;optimizer&quot; =&gt; GradientDescentOptimizer!
+  &quot;optimizer_name&quot; =&gt; &quot;GradientDescentOptimizer!&quot;
+  &quot;learning_rate&quot; =&gt; 0.01</code></pre> <p>Training loop:</p> <pre><code class="julia hljs">epochs = <span class=hljs-number >250</span>
+
+xor_loss = <span class=hljs-number >0.0</span>
+xor_losses = []
+
+cross_entropy_loss(x_in, y_val) = -sum(y_val .* log.(Forward(xor_net, x_in)))
+
+<span class=hljs-keyword >for</span> epoch <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:epochs
+    <span class=hljs-keyword >for</span> (i, input) <span class=hljs-keyword >in</span> enumerate(data)
+        x_in = convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, input)
+        y_val = targets[i]
+
+        pred = Forward(xor_net, x_in)
+        <span class=hljs-keyword >global</span> xor_loss = cross_entropy_loss(x_in, y_val)
+
+        Backward!(xor_net, cross_entropy_loss, x_in, y_val)
+
+        <span class=hljs-keyword >if</span> epoch % <span class=hljs-number >50</span> == <span class=hljs-number >0</span> &amp;&amp; i == length(targets)
+            println(<span class=hljs-string >&quot;Epoch <span class=hljs-variable >$epoch</span>\tPred: <span class=hljs-subst >$(round(maximum(pred)</span>, digits=4))\tTarget: <span class=hljs-subst >$(maximum(y_val)</span>)\tloss: <span class=hljs-subst >$(round(xor_loss, digits=<span class=hljs-number >4</span>)</span>)&quot;</span>)
+        <span class=hljs-keyword >end</span>
+    <span class=hljs-keyword >end</span>
+    push!(xor_losses, xor_loss)
+<span class=hljs-keyword >end</span>
+
+preds = round.(maximum.([Forward(xor_net, convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, x)) <span class=hljs-keyword >for</span> x <span class=hljs-keyword >in</span> data]))
+passed = preds .== convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, maximum.(targets))
+
+println(<span class=hljs-string >&quot;\n<span class=hljs-subst >$(sum(passed)</span>)/4 tests passed | Accuracy <span class=hljs-subst >$(<span class=hljs-number >100</span> * sum(passed)</span> / length(targets))%&quot;</span>)</code></pre> <pre><code class="plaintext hljs">Epoch 50	Pred: 0.7142	Target: 1.0	loss: 0.8478
+Epoch 100	Pred: 0.7681	Target: 1.0	loss: 0.5518
+Epoch 150	Pred: 0.8103	Target: 1.0	loss: 0.3888
+Epoch 200	Pred: 0.8428	Target: 1.0	loss: 0.2921
+Epoch 250	Pred: 0.8681	Target: 1.0	loss: 0.2302
+
+4/4 tests passed | Accuracy 100.0%
+</code></pre> <pre><code class="julia hljs">plot(
+    xor_losses,
+    xlabel=<span class=hljs-string >&quot;Epoch&quot;</span>, ylabel=<span class=hljs-string >&quot;Cross-Entropy Loss&quot;</span>, label=<span class=hljs-string >&quot;&quot;</span>,
+    size=(<span class=hljs-number >800</span>,<span class=hljs-number >500</span>), dpi=<span class=hljs-number >300</span>
+)</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/simple-nn-showcase/code/output/xor-plot.svg" alt=""></div> <h2 id=comparing_optimizers ><a href="#comparing_optimizers" class=header-anchor >Comparing Optimizers</a></h2> <p><code>simple_nn</code> has a couple of built-in optimizers. To compare them, we&#39;ll revisit the XOR problem. Defining the networks for each optimizer:</p> <pre><code class="julia hljs">optimizers = [
+    GradientDescentOptimizer!,
+    MomentumOptimizer!,
+    RMSpropOptimizer!,
+    AdamOptimizer!
+]
+
+xor_networks = [
+    CreateNetwork(setup, datatype=<span class=hljs-built_in >Float32</span>, init_distribution=Normal()) <span class=hljs-keyword >for</span> _ <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:length(optimizers)
+]
+
+<span class=hljs-keyword >for</span> (i, opt) <span class=hljs-keyword >in</span> enumerate(optimizers)
+    OptimizerSetup!(xor_networks[i], opt)
+<span class=hljs-keyword >end</span></code></pre> <p>Training loop:</p> <pre><code class="julia hljs">opt_loss = []
+opt_losses = []
+
+loss_funcs = [
+    (x_in, y_val) -&gt; -sum(y_val .* log.(Forward(net, x_in))) <span class=hljs-keyword >for</span> net <span class=hljs-keyword >in</span> xor_networks
+]
+
+<span class=hljs-keyword >for</span> epoch <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:epochs
+    <span class=hljs-keyword >for</span> (i, input) <span class=hljs-keyword >in</span> enumerate(data)
+        x_in = convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, input)
+        y_val = targets[i]
+
+        <span class=hljs-keyword >global</span> opt_loss = []
+
+        <span class=hljs-keyword >for</span> i <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:length(optimizers)
+            push!(opt_loss, loss_funcs[i](x_in, y_val))
+            Backward!(xor_networks[i], loss_funcs[i], x_in, y_val)
+        <span class=hljs-keyword >end</span>
+    <span class=hljs-keyword >end</span>
+    push!(opt_losses, opt_loss)
+<span class=hljs-keyword >end</span></code></pre> <p>Plotting the losses of each optimizer:</p> <pre><code class="julia hljs">loss_gd = [loss[<span class=hljs-number >1</span>] <span class=hljs-keyword >for</span> loss <span class=hljs-keyword >in</span> opt_losses]
+loss_mgd = [loss[<span class=hljs-number >2</span>] <span class=hljs-keyword >for</span> loss <span class=hljs-keyword >in</span> opt_losses]
+loss_rms = [loss[<span class=hljs-number >3</span>] <span class=hljs-keyword >for</span> loss <span class=hljs-keyword >in</span> opt_losses]
+loss_adam = [loss[<span class=hljs-number >4</span>] <span class=hljs-keyword >for</span> loss <span class=hljs-keyword >in</span> opt_losses]
+
+plot(loss_gd, xlabel=<span class=hljs-string >&quot;Epoch&quot;</span>, ylabel=<span class=hljs-string >&quot;Cross-Entropy Loss&quot;</span>, label=<span class=hljs-string >&quot;Gradient Descent&quot;</span>, size=(<span class=hljs-number >800</span>,<span class=hljs-number >500</span>), dpi=<span class=hljs-number >300</span>)
+plot!(loss_mgd, label=<span class=hljs-string >&quot;Momentum&quot;</span>)
+plot!(loss_rms, label=<span class=hljs-string >&quot;RMSprop&quot;</span>)
+plot!(loss_adam, label=<span class=hljs-string >&quot;ADAM&quot;</span>)</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/simple-nn-showcase/code/output/opt-plot.svg" alt=""></div> <h2 id=mnist ><a href="#mnist" class=header-anchor >MNIST</a></h2> <p>Importing data:</p> <pre><code class="julia hljs">train_x, train_y = MNIST(split=:train)[:]
+train_x = <span class=hljs-built_in >Float32</span>.(train_x)
+
+test_x, test_y = MNIST(split=:test)[:]
+test_x = <span class=hljs-built_in >Float32</span>.(test_x)</code></pre> <p>Defining some helper functions:</p> <pre><code class="julia hljs">flatten(matrix) = vcat(matrix...)
+
+<span class=hljs-keyword >function</span> one_hot_encoding(target)
+    <span class=hljs-keyword >return</span> <span class=hljs-built_in >Float32</span>.(target .== collect(<span class=hljs-number >0</span>:<span class=hljs-number >9</span>))
+<span class=hljs-keyword >end</span></code></pre> <p>Defining the network:</p> <pre><code class="julia hljs">mnist_network = CreateNetwork([
+    DenseLayer((<span class=hljs-number >784</span>, <span class=hljs-number >128</span>), sigmoid_activation),
+    DenseLayer((<span class=hljs-number >128</span>, <span class=hljs-number >64</span>), sigmoid_activation),
+    DenseLayer((<span class=hljs-number >64</span>, <span class=hljs-number >10</span>), softmax_activation)
+], datatype=<span class=hljs-built_in >Float32</span>, init_distribution=Normal())
+
+OptimizerSetup!(mnist_network, AdamOptimizer!);</code></pre> <p>Training loop:</p> <pre><code class="julia hljs">epochs = <span class=hljs-number >1000</span>
+
+mnist_loss = <span class=hljs-number >0.0</span>
+
+batch_size = <span class=hljs-number >32</span>
+batch_losses = []
+validation_accuracies = []
+
+cross_entropy_loss(x_in, y_val) = -sum(y_val .* log.(Forward(mnist_network, x_in)))
+
+<span class=hljs-keyword >for</span> epoch <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:epochs
+    batch_idx = rand((<span class=hljs-number >1</span>:size(train_x, <span class=hljs-number >3</span>)), batch_size)
+
+    batch_x = train_x[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, <span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, batch_idx]
+    batch_y = train_y[batch_idx]
+
+    batch_loss = []
+
+    <span class=hljs-keyword >for</span> i <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:batch_size
+        x_in = convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, flatten(batch_x[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, <span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, i]))
+        y_val = one_hot_encoding(batch_y[i])
+
+        pred = Forward(mnist_network, x_in)
+        <span class=hljs-keyword >global</span> mnist_loss = cross_entropy_loss(x_in, y_val)
+
+        Backward!(mnist_network, cross_entropy_loss, x_in, y_val)
+
+        push!(batch_loss, mnist_loss)
+    <span class=hljs-keyword >end</span>
+
+    push!(batch_losses, sum(batch_loss) / length(batch_loss))
+
+    <span class=hljs-keyword >if</span> epoch % <span class=hljs-number >5</span> == <span class=hljs-number >0</span>
+        val_batch = <span class=hljs-number >32</span>
+        val_batch_idx = rand((<span class=hljs-number >1</span>:size(test_x, <span class=hljs-number >3</span>)), val_batch)
+
+        test_predictions = argmax.([
+            Forward(mnist_network, convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, flatten(test_x[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, <span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, idx]))) <span class=hljs-keyword >for</span> idx <span class=hljs-keyword >in</span> val_batch_idx
+        ]) .- <span class=hljs-number >1</span>
+
+        test_correct = test_predictions .== test_y[val_batch_idx]
+        val_accuracy = <span class=hljs-number >100</span> * sum(test_correct) / val_batch
+
+        push!(validation_accuracies, val_accuracy)
+    <span class=hljs-keyword >end</span>
+<span class=hljs-keyword >end</span></code></pre> <pre><code class="julia hljs">p1 = plot(batch_losses, yaxis=:log, label=<span class=hljs-string >&quot;Batch Loss&quot;</span>)
+p2 = plot(validation_accuracies, label=<span class=hljs-string >&quot;Validation Accuracy&quot;</span>)
+
+plot(p1, p2, layout=(<span class=hljs-number >1</span>,<span class=hljs-number >2</span>), size=(<span class=hljs-number >800</span>,<span class=hljs-number >400</span>), dpi=<span class=hljs-number >300</span>)</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/simple-nn-showcase/code/output/mnist-plot.svg" alt=""></div> <p>Classifying a small sample of images:</p> <pre><code class="julia hljs">samps = rand(<span class=hljs-number >1</span>:size(test_x, <span class=hljs-number >3</span>), <span class=hljs-number >4</span>)
+
+test_preds = [
+    Forward(mnist_network, convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, flatten(test_x[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, <span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, samp]))) <span class=hljs-keyword >for</span> samp <span class=hljs-keyword >in</span> samps
+]
+
+preds = [findmax(pred)[<span class=hljs-number >2</span>] - <span class=hljs-number >1</span> <span class=hljs-keyword >for</span> pred <span class=hljs-keyword >in</span> test_preds]
+
+plots = []
+<span class=hljs-keyword >for</span> (i, pred) <span class=hljs-keyword >in</span> enumerate(preds)
+    temp = heatmap(
+        test_x[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, <span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, samps[i]]&#x27;,
+        yflip=<span class=hljs-literal >true</span>,
+        title=<span class=hljs-string >&quot;Target = <span class=hljs-subst >$(test_y[samps[i]])</span> | Prediction = <span class=hljs-variable >$pred</span>&quot;</span>,
+    )
+
+    push!(plots, temp)
+<span class=hljs-keyword >end</span>
+
+plot(plots..., layout=(<span class=hljs-number >2</span>,<span class=hljs-number >2</span>), size=(<span class=hljs-number >700</span>,<span class=hljs-number >600</span>), dpi=<span class=hljs-number >300</span>)</code></pre> <div class=im-100 ><span style="color:red;">// Image matching '/assets/posts/simple-nn-showcase/code/mnist-samp-plot' not found. //</span></div> <p>Overall accuracy:</p> <pre><code class="julia hljs">test_predictions = argmax.([
+    Forward(mnist_network, convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, flatten(test_x[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, <span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, i]))) <span class=hljs-keyword >for</span> i <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:size(test_x, <span class=hljs-number >3</span>)
+]) .- <span class=hljs-number >1</span>
+
+test_correct = test_predictions .== test_y
+
+println(<span class=hljs-string >&quot;Accuracy: <span class=hljs-subst >$(round(<span class=hljs-number >100</span> * sum(test_correct)</span> / length(test_correct), digits=2))%&quot;</span>)</code></pre> <pre><code class="plaintext hljs">UndefVarError: test_x not defined
+</code></pre> <h2 id=wrapping_up ><a href="#wrapping_up" class=header-anchor >Wrapping Up</a></h2> <p>Hope you enjoyed this small showcase of <code>simple_nn</code>. I am planning on working on it some more. I already have a somewhat functional implementation of convolutional neural networks, but it does not work that well with <code>Zygote.jl</code>, the autodifferentiation library I use. I created this project for my own learning, I do not expect anyone to actually use this. But it was fun to work on, and it definitely helped me understand the neural networks a lot more.</p> <p>Thanks for reading&#33; Until next time.</p> <div class=page-foot > <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <a href="https://michaszj.github.io/">Michal Jagodzinski</a>. Last modified: April 06, 2023. <br>Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>. </div> </div> </div> </div> <script src="/starcoffee/libs/highlight/highlight.min.js"></script> <script>hljs.highlightAll();hljs.configure({tabReplace: ' '});</script> <label for=sidebar-checkbox  class=sidebar-toggle ></label>

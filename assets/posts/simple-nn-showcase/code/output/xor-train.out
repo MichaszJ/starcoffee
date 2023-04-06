@@ -1,0 +1,7 @@
+Epoch 50	Pred: 0.7142	Target: 1.0	loss: 0.8478
+Epoch 100	Pred: 0.7681	Target: 1.0	loss: 0.5518
+Epoch 150	Pred: 0.8103	Target: 1.0	loss: 0.3888
+Epoch 200	Pred: 0.8428	Target: 1.0	loss: 0.2921
+Epoch 250	Pred: 0.8681	Target: 1.0	loss: 0.2302
+
+4/4 tests passed | Accuracy 100.0%
