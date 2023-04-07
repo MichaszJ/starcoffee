@@ -8,7 +8,6 @@ Source: [MichaszJ/satellite-analysis-toolkit](https://github.com/MichaszJ/satell
 
 Posts related to SAT:
 
-<!-- - [SAT Work Log 3](/posts/sat-work-log-3/) - April 7th, 2023 -->
-
+- [SAT Work Log 3](/posts/sat-work-log-3/) - April 7th, 2023
 - [SAT Work Log 2](/posts/sat-work-log-2/) - April 4th, 2023
 - [Getting Started on SAT](/posts/getting-started-on-sat/) - April 2nd, 2023
