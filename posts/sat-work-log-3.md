@@ -484,8 +484,8 @@ function TwoBodySystem(
     )
 end
 
-function SolveOrbitalSystem(system::OrbitalSystem; solver_args...)
-    return solve(system.problem; solver_args...)
+function SolveOrbitalSystem(system::OrbitalSystem, solver::Union{DEAlgorithm,Nothing}; solver_args...)
+    return solve(system.problem, solver; solver_args...)
 end
 ```
 
@@ -501,3 +501,44 @@ I think this emphasis on validation ensures that no silly mistakes are made, and
 The `SolveOrbitalSystem` function is probably not necessary, but it just simplifies the call to the `solve` function by removing the need for the user to specify the problem of the system themselves.
 
 ### Testing Orbital Dynamics Integration
+
+With the `OrbitalSystem` struct, it is now pretty convenient to define and solve the two-body problem. For a simple plotting example using `Makie.jl`:
+
+```julia
+two_body_system = TwoBodySystem(
+    two_body_example_u₀,
+    two_body_example_p,
+    two_body_example_tspan
+)
+
+two_body_sol = SolveOrbitalSystem(two_body_system, Tsit5())
+
+fig = Figure(resolution=(1500,1500))
+ax1 = Axis3(fig[1,1])
+
+lines!(
+    ax1,
+    sol_interp[x₁], sol_interp[y₁], sol_interp[z₁],
+    label="Mass 1"
+)
+
+lines!(
+    ax1,
+    sol_interp[x₂], sol_interp[y₂], sol_interp[z₂],
+    label="Mass 2"
+)
+
+axislegend(ax1)
+```
+
+@@im-100
+\fig{makie-plot.png}
+@@
+
+I will also write some more functions to further simplify workflows. For example, a function that automatically returns the vectors of interpolated values from the solution variable given the desired variables and a range of times.
+
+## Wrapping Up
+
+Thanks for reading! It was fun adding more functionality to SAT. With the main orbital dynamics propagators defined I will focus more on building interactive tools that use them, as well as further refining the workflow of using the `OrbitalSystem` objects.
+
+Thanks for reading! Until next time.
