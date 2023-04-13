@@ -17,6 +17,7 @@ Feel free to reach out on [Twitter](https://twitter.com/astra_kawa) or [LinkedIn
 
 ## All Posts
 
+- [SAT Work Log 4](/posts/sat-work-log-4/) - April 13th, 2023
 - [SAT Work Log 3](/posts/sat-work-log-3/) - April 7th, 2023
 - [Simple NN Showcase](/posts/simple-nn-showcase/) - April 6th, 2023
 - [SAT Work Log 2](/posts/sat-work-log-2/) - April 4th, 2023
