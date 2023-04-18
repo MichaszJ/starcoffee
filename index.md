@@ -1,7 +1,11 @@
 @def title = "Star Coffee"
 
-@@im-100
-![](banner.png)
+@@im-75
+![](https://source.unsplash.com/75uTgTrJRsM)
+@@
+
+@@img-caption
+Photo by [Michal Jagodzinski](https://unsplash.com/photos/75uTgTrJRsM)
 @@
 
 Hello! I am Michal Jagodzinski, I am a new graduate from the aerospace engineering program at Toronto Metropolitan University and a Python developer at [Formify](https://www.formify.ca/). I'm interested in programming, spacecraft, simulation, and GN&C.
@@ -17,6 +21,7 @@ Feel free to reach out on [Twitter](https://twitter.com/astra_kawa) or [LinkedIn
 
 ## All Posts
 
+- [SAT Work Log 5](/posts/sat-work-log-5/) - April 17th, 2023
 - [SAT Work Log 4](/posts/sat-work-log-4/) - April 13th, 2023
 - [SAT Work Log 3](/posts/sat-work-log-3/) - April 7th, 2023
 - [Simple NN Showcase](/posts/simple-nn-showcase/) - April 6th, 2023
