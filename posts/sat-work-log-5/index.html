@@ -1,0 +1,234 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/starcoffee/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/starcoffee/css/franklin.css"> <link rel=stylesheet  href="/starcoffee/css/poole_lanyon.css"> <link rel=stylesheet  href="/starcoffee/css/adjust.css"> <link rel=icon  href="/starcoffee/assets/favicon.png"> <title>SAT Work Log 5</title> <input type=checkbox  class=sidebar-checkbox  id=sidebar-checkbox > <div class=sidebar  id=sidebar > <div class=sidebar-item > <p>A theme adapted from <a href="http://lanyon.getpoole.com/" target=_blank >Lanyon</a>.</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/starcoffee/">Home</a> <a class="sidebar-nav-item " href="/starcoffee/posts/welcome-to-star-coffee/">Welcome to Star Coffee</a> <a class="sidebar-nav-item " href="/starcoffee/posts/projects/">Projects</a> <a class="sidebar-nav-item " href="/starcoffee/posts/satellite-analysis-toolkit/">Satellite Analysis Toolkit</a> <a class="sidebar-nav-item " href="/starcoffee/posts/simple-nn/">Simple NN</a> </nav> <div class=sidebar-item > <p>&copy; Michal Jagodzinski.</p> </div> </div> <!-- Wrap is the content to shift when toggling the sidebar. We wrap the content to avoid any CSS collisions with our real content. --> <div class=wrap > <div class=masthead > <div class=container > <h3 class=masthead-title > <a href="/starcoffee/" title=Home >Star Coffee</a> <small>Writing about stuff, working in public</small> </h3> </div> </div> <div class="container content"> <div class=franklin-content ><h1 id=sat_work_log_5 ><a href="#sat_work_log_5" class=header-anchor >SAT Work Log 5</a></h1> <p><em>Work Log - April 17th, 2023</em></p> <div class=franklin-toc ><ol><li><a href="#improving_the_orbital_dynamics_system">Improving the Orbital Dynamics System</a><li><a href="#simulations_with_improved_orbital_dynamics_system">Simulations with Improved Orbital Dynamics System</a><li><a href="#wrapping_up">Wrapping Up</a></ol></div> <div class=im-100 ><img src="https://source.unsplash.com/ZAiB0cKW9dI" alt="" /></div> <div class=img-caption >Photo by <a href="https://unsplash.com/photos/ZAiB0cKW9dI">Michal Jagodzinski</a></div> <p>Hello and welcome back to Star Coffee&#33; This is going to be another shorter post as I have been a bit busy lately. In this post, I go over some new updates on the orbital dynamics component of the Satellite Analysis Toolkit. Let&#39;s get into it.</p> <h2 id=improving_the_orbital_dynamics_system ><a href="#improving_the_orbital_dynamics_system" class=header-anchor >Improving the Orbital Dynamics System</a></h2> <p>Firstly, I fixed a small &quot;bug&quot; or typing mistake regarding the <code>OrbitalSystem</code> struct I defined in <a href="https://michaszj.github.io/starcoffee/posts/sat-work-log-3/">SAT Work Log 3</a>. There, I defined the struct as:</p> <pre><code class="julia hljs"><span class=hljs-keyword >struct</span> OrbitalSystem{T&lt;:<span class=hljs-built_in >Number</span>, Quant&lt;:<span class=hljs-built_in >Number</span>}
+    type::<span class=hljs-built_in >String</span>
+    eqns::<span class=hljs-built_in >Vector</span>{Equation}
+    system::ODESystem
+    problem::ODEProblem
+    u₀::<span class=hljs-built_in >Dict</span>{Num, Quant}
+    params::<span class=hljs-built_in >Dict</span>{Num, Quant}
+    tspan::<span class=hljs-built_in >Vector</span>{T}
+<span class=hljs-keyword >end</span></code></pre> <p>I wrote this when I was still learning structs, so it wasn&#39;t defined in the clearest way. This time around I rewrote the <code>Quant</code> types as type unions instead:</p> <pre><code class="julia hljs"><span class=hljs-keyword >struct</span> OrbitalSystem{T&lt;:<span class=hljs-built_in >Number</span>}
+    type::<span class=hljs-built_in >String</span>
+    orbital_bodies::<span class=hljs-built_in >Dict</span>{<span class=hljs-built_in >String</span>, OrbitalBody}
+    eqns::<span class=hljs-built_in >Vector</span>{Equation}
+    system::ODESystem
+    problem::ODEProblem
+    u₀::<span class=hljs-built_in >Dict</span>{Num, <span class=hljs-built_in >Union</span>{T, Quantity{T}}}
+    params::<span class=hljs-built_in >Dict</span>{Num, <span class=hljs-built_in >Union</span>{T, Quantity{T}}}
+    tspan::<span class=hljs-built_in >Vector</span>{T}
+<span class=hljs-keyword >end</span></code></pre> <p>This version is written a little clearer I think. For context, I want users to be able to define orbital systems with or without <code>Unitful.jl</code> units, hence the type union. You may notice the addition of the <code>orbital_bodies</code> field. I am implementing a new struct called <code>OrbitalBody</code>, which contains all the information about a specific body in an orbital system. It is defined as:</p> <pre><code class="julia hljs"><span class=hljs-keyword >mutable struct</span> BodyState{T&lt;:<span class=hljs-built_in >Number</span>}
+    x::<span class=hljs-built_in >Union</span>{T, Quantity{T}}
+    y::<span class=hljs-built_in >Union</span>{T, Quantity{T}}
+    z::<span class=hljs-built_in >Union</span>{T, Quantity{T}}
+    ẋ::<span class=hljs-built_in >Union</span>{T, Quantity{T}}
+    ẏ::<span class=hljs-built_in >Union</span>{T, Quantity{T}}
+    ż::<span class=hljs-built_in >Union</span>{T, Quantity{T}}
+<span class=hljs-keyword >end</span>
+
+<span class=hljs-keyword >mutable struct</span> OrbitalBody{T&lt;:<span class=hljs-built_in >Number</span>}
+    name::<span class=hljs-built_in >String</span>
+    mass::<span class=hljs-built_in >Union</span>{T, Quantity{T}}
+    state::BodyState{T}
+<span class=hljs-keyword >end</span></code></pre> <p>I created these structs to better organize information about orbital systems and to provide an interface for future interactive orbital dynamics tools. With the new <code>OrbitalSystem</code> definition, the constructor for a two-body system is:</p> <pre><code class="julia hljs"><span class=hljs-keyword >function</span> TwoBodySystem(
+    u₀::<span class=hljs-built_in >Dict</span>{Num, Quantity{T}},
+    params::<span class=hljs-built_in >Dict</span>{Num, Quantity{T}},
+    tspan::<span class=hljs-built_in >Vector</span>{T}
+) <span class=hljs-keyword >where</span> {T&lt;:<span class=hljs-built_in >Number</span>}
+
+    <span class=hljs-meta >@assert</span> valtype(u₀) == valtype(params) <span class=hljs-string >&quot;Numeric values in u₀ and params must be the same type&quot;</span>
+
+    two_body_equations = LoadTwoBodyEquations()
+
+    diffeq_two_body_system = structural_simplify(
+        ODESystem(two_body_equations, t, name=:two_body_system)
+    )
+
+    prob = ODEProblem(
+        diffeq_two_body_system,
+        remove_units(u₀),
+        tspan,
+        remove_units(params),
+        jac=<span class=hljs-literal >true</span>
+    )
+
+    orbital_bodies = <span class=hljs-built_in >Dict</span>(
+        <span class=hljs-string >&quot;Body 1&quot;</span> =&gt; OrbitalBody(
+            <span class=hljs-string >&quot;Body 1&quot;</span>,
+            params[m₁],
+            BodyState(
+                u₀[x₁],
+                u₀[y₁],
+                u₀[z₁],
+                u₀[ẋ₁],
+                u₀[ẏ₁],
+                u₀[ż₁],
+            )
+        ),
+        <span class=hljs-string >&quot;Body 2&quot;</span> =&gt; OrbitalBody(
+            <span class=hljs-string >&quot;Body 2&quot;</span>,
+            params[m₂],
+            BodyState(
+                u₀[x₂],
+                u₀[y₂],
+                u₀[z₂],
+                u₀[ẋ₂],
+                u₀[ẏ₂],
+                u₀[ż₂],
+            )
+        ),
+    )
+
+    <span class=hljs-keyword >return</span> OrbitalSystem{T}(
+        <span class=hljs-string >&quot;Two-Body System&quot;</span>,
+        orbital_bodies,
+        two_body_equations,
+        diffeq_two_body_system,
+        prob,
+        u₀,
+        params,
+        tspan
+    )
+<span class=hljs-keyword >end</span></code></pre> <p>I also implemented constructors for the <code>OrbitalSystem</code> based on the number of inputted <code>OrbitalBody</code> structs, e.g., for a two-body system:</p> <pre><code class="julia hljs"><span class=hljs-keyword >function</span> OrbitalSystem(
+    body_1::OrbitalBody{T},
+    body_2::OrbitalBody{T},
+    tspan::<span class=hljs-built_in >Vector</span>{T};
+    G_val=<span class=hljs-number >6.6743e-11</span>
+) <span class=hljs-keyword >where</span> {T&lt;:<span class=hljs-built_in >Number</span>}
+
+    orbital_bodies = <span class=hljs-built_in >Dict</span>(
+        body_1.name =&gt; body_1,
+        body_2.name =&gt; body_2
+    )
+
+    two_body_equations = LoadTwoBodyEquations()
+
+    diffeq_two_body_system = structural_simplify(
+        ODESystem(two_body_equations, t, name=:two_body_system)
+    )
+
+    u₀ = <span class=hljs-built_in >Dict</span>(
+        x₁ =&gt; body_1.state.x,
+        y₁ =&gt; body_1.state.y,
+        z₁ =&gt; body_1.state.z,
+        ẋ₁ =&gt; body_1.state.ẋ,
+        ẏ₁ =&gt; body_1.state.ẏ,
+        ż₁ =&gt; body_1.state.ż,
+        x₂ =&gt; body_2.state.x,
+        y₂ =&gt; body_2.state.y,
+        z₂ =&gt; body_2.state.z,
+        ẋ₂ =&gt; body_2.state.ẋ,
+        ẏ₂ =&gt; body_2.state.ẏ,
+        ż₂ =&gt; body_2.state.ż
+    )
+
+    params = <span class=hljs-built_in >Dict</span>(
+        G =&gt; G_val,
+        m₁ =&gt; body_1.mass,
+        m₂ =&gt; body_2.mass
+    )
+
+    <span class=hljs-keyword >if</span> (typeof(body_1.mass) == typeof(body_2.mass)) &amp;&amp; typeof(body_1.mass) &lt;: Quantity{T}
+        <span class=hljs-keyword >if</span> !(typeof(G_val) &lt;: Quantity{T})
+            params[G] = G_val * <span class=hljs-number >1</span><span class=hljs-string >u&quot;N*m^2/kg^2&quot;</span>
+        <span class=hljs-keyword >end</span>
+
+        prob = ODEProblem(
+            diffeq_two_body_system,
+            remove_units(u₀),
+            tspan,
+            remove_units(params),
+            jac=<span class=hljs-literal >true</span>
+        )
+    <span class=hljs-keyword >else</span>
+        prob = ODEProblem(
+            diffeq_two_body_system,
+            u₀,
+            tspan,
+            params,
+            jac=<span class=hljs-literal >true</span>
+        )
+    <span class=hljs-keyword >end</span>
+
+    <span class=hljs-keyword >return</span> OrbitalSystem{T}(
+        <span class=hljs-string >&quot;Two-Body System&quot;</span>,
+        orbital_bodies,
+        two_body_equations,
+        diffeq_two_body_system,
+        prob,
+        u₀,
+        params,
+        tspan
+    )
+<span class=hljs-keyword >end</span></code></pre> <h2 id=simulations_with_improved_orbital_dynamics_system ><a href="#simulations_with_improved_orbital_dynamics_system" class=header-anchor >Simulations with Improved Orbital Dynamics System</a></h2> <p>Now a simple plotting example using this new system:</p> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> GLMakie, ModelingToolkit, DifferentialEquations, Unitful
+GLMakie.activate!()
+
+include(<span class=hljs-string >&quot;TwoBody.jl&quot;</span>)
+
+body1 = OrbitalBody(
+    <span class=hljs-string >&quot;Test 1&quot;</span>,
+    <span class=hljs-number >10e26</span><span class=hljs-string >u&quot;kg&quot;</span>,
+    BodyState(<span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>, <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>, <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>, <span class=hljs-number >10.0</span><span class=hljs-string >u&quot;km/s&quot;</span>, <span class=hljs-number >20.0</span><span class=hljs-string >u&quot;km/s&quot;</span>, <span class=hljs-number >30.0</span><span class=hljs-string >u&quot;km/s&quot;</span>)
+)
+
+body2 = OrbitalBody(
+    <span class=hljs-string >&quot;Test 2&quot;</span>,
+    <span class=hljs-number >10e26</span><span class=hljs-string >u&quot;kg&quot;</span>,
+    BodyState(<span class=hljs-number >3000.0</span><span class=hljs-string >u&quot;km&quot;</span>, <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>, <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>, <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m/s&quot;</span>, <span class=hljs-number >40.0</span><span class=hljs-string >u&quot;km/s&quot;</span>, <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m/s&quot;</span>)
+)
+
+t, x₁, y₁, z₁, ẋ₁, ẏ₁, ż₁, x₂, y₂, z₂, ẋ₂, ẏ₂, ż₂, r, D, G, m₁, m₂ = LoadTwoBodyVariables()
+
+two_body_system = OrbitalSystem(body1, body2, [<span class=hljs-number >0.0</span>, <span class=hljs-number >480.0</span>])
+two_body_sol = SolveOrbitalSystem(two_body_system, Tsit5())
+
+fig = Figure(resolution=(<span class=hljs-number >1500</span>,<span class=hljs-number >1500</span>)); display(fig);
+ax1 = Axis3(fig[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>])
+
+times = <span class=hljs-number >0.0</span>:<span class=hljs-number >0.1</span>:<span class=hljs-number >480.0</span>
+lines!(ax1, interp_sol(two_body_sol, [x₁, y₁, z₁], times)..., label=<span class=hljs-string >&quot;Mass 1&quot;</span>)
+lines!(ax1, interp_sol(two_body_sol, [x₂, y₂, z₂], times)..., label=<span class=hljs-string >&quot;Mass 2&quot;</span>)
+axislegend(ax1)</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/sat-work-log-5/code/two-body-plot.png" alt=""></div> <p>Alternatively, using the previous system:</p> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> GLMakie, ModelingToolkit, DifferentialEquations, Unitful
+GLMakie.activate!()
+
+include(<span class=hljs-string >&quot;TwoBody.jl&quot;</span>)
+
+t, x₁, y₁, z₁, ẋ₁, ẏ₁, ż₁, x₂, y₂, z₂, ẋ₂, ẏ₂, ż₂, r, D, G, m₁, m₂ = LoadTwoBodyVariables()
+
+two_body_example_u₀ = <span class=hljs-built_in >Dict</span>(
+    x₁ =&gt; <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>,
+    y₁ =&gt; <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>,
+    z₁ =&gt; <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>,
+    ẋ₁ =&gt; <span class=hljs-number >10.0</span><span class=hljs-string >u&quot;km/s&quot;</span>,
+    ẏ₁ =&gt; <span class=hljs-number >20.0</span><span class=hljs-string >u&quot;km/s&quot;</span>,
+    ż₁ =&gt; <span class=hljs-number >30.0</span><span class=hljs-string >u&quot;km/s&quot;</span>,
+    x₂ =&gt; <span class=hljs-number >3000.0</span><span class=hljs-string >u&quot;km&quot;</span>,
+    y₂ =&gt; <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>,
+    z₂ =&gt; <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m&quot;</span>,
+    ẋ₂ =&gt; <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m/s&quot;</span>,
+    ẏ₂ =&gt; <span class=hljs-number >40.0</span><span class=hljs-string >u&quot;km/s&quot;</span>,
+    ż₂ =&gt; <span class=hljs-number >0.0</span><span class=hljs-string >u&quot;m/s&quot;</span>
+)
+
+two_body_example_p = <span class=hljs-built_in >Dict</span>(
+    G =&gt; <span class=hljs-number >6.6743e-11</span><span class=hljs-string >u&quot;N*m^2/kg^2&quot;</span>,
+    m₁ =&gt; <span class=hljs-number >10e26</span><span class=hljs-string >u&quot;kg&quot;</span>,
+    m₂ =&gt; <span class=hljs-number >10e26</span><span class=hljs-string >u&quot;kg&quot;</span>
+)
+
+two_body_system = TwoBodySystem(two_body_example_u₀, two_body_example_p, [<span class=hljs-number >0.0</span>, <span class=hljs-number >480.0</span>])
+two_body_sol = SolveOrbitalSystem(two_body_system, Tsit5())
+
+fig = Figure(resolution=(<span class=hljs-number >1500</span>,<span class=hljs-number >1500</span>)); display(fig);
+ax1 = Axis3(fig[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>])
+
+times = <span class=hljs-number >0.0</span>:<span class=hljs-number >0.1</span>:<span class=hljs-number >480.0</span>
+lines!(ax1, interp_sol(two_body_sol, [x₁, y₁, z₁], times)..., label=<span class=hljs-string >&quot;Mass 1&quot;</span>)
+lines!(ax1, interp_sol(two_body_sol, [x₂, y₂, z₂], times)..., label=<span class=hljs-string >&quot;Mass 2&quot;</span>)
+axislegend(ax1)</code></pre> <p>Both methods result in the exact same <code>OrbitalSystem</code>. I think having a choice of methods is a good idea. Using the <code>OrbitalBody</code> method is better for integrating with interactive tools, whereas using the <code>TwoBodySystem</code> constructor is better for users directly running simulations manually.</p> <p>I needed to include the call to the <code>LoadTwoBodyVariables&#40;&#41;</code> as the <code>Symbolics.jl</code> variables could be defined with or without units, and I don&#39;t want to assume units for every case. These variables have to be defined as the <code>OrbitalSystem</code> uses ODEs defined by these variables &#40;see <a href="https://michaszj.github.io/starcoffee/posts/sat-work-log-2/#orbital_dynamics_work">SAT Work Log 2 - Orbital Dynamics Work</a>&#41;. To work with unitless values, <code>LoadTwoBodyVariablesUnitless&#40;&#41;</code> is called instead.</p> <p>I realize having to define the system variables in the main scope in this way is quite clunky. Unfortunately this is the best way I found to do this at the moment. I am thinking of defining macros to do this automatically, but I don&#39;t know enough about macros to implement this just yet.</p> <p>I also wrote a simple helper function to automatically apply and return the interpolated values of inputted variables to an ODE solution, which I use above:</p> <pre><code class="julia hljs"><span class=hljs-keyword >function</span> interp_sol(
+    solution::ODESolution,
+    vars::<span class=hljs-built_in >Vector</span>{Num},
+    times::<span class=hljs-built_in >Union</span>{<span class=hljs-built_in >StepRangeLen</span>, <span class=hljs-built_in >Vector</span>}
+)
+
+    sol_interp = solution(times)
+    <span class=hljs-keyword >return</span> [sol_interp[var] <span class=hljs-keyword >for</span> var <span class=hljs-keyword >in</span> vars]
+<span class=hljs-keyword >end</span></code></pre> <h2 id=wrapping_up ><a href="#wrapping_up" class=header-anchor >Wrapping Up</a></h2> <p>Thanks for reading this short post&#33; I hope to have more exciting work to showcase soon. I want a good foundation defined before building more complex tools, so I believe this type of work is necessary. Until next time.</p> <div class=page-foot > <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <a href="https://michaszj.github.io/">Michal Jagodzinski</a>. Last modified: April 18, 2023. <br>Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>. </div> </div> </div> </div> <script src="/starcoffee/libs/highlight/highlight.min.js"></script> <script>hljs.highlightAll();hljs.configure({tabReplace: ' '});</script> <label for=sidebar-checkbox  class=sidebar-toggle ></label>
