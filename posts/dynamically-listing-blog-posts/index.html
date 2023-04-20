@@ -1,0 +1,109 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/starcoffee/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/starcoffee/css/franklin.css"> <link rel=stylesheet  href="/starcoffee/css/poole_lanyon.css"> <link rel=stylesheet  href="/starcoffee/css/adjust.css"> <link rel=icon  href="/starcoffee/assets/favicon.png"> <title>Dynamically Listing Blog Posts</title> <input type=checkbox  class=sidebar-checkbox  id=sidebar-checkbox > <div class=sidebar  id=sidebar > <div class=sidebar-item > <p>Star Coffee</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/starcoffee/">Home</a> <a class="sidebar-nav-item " href="/starcoffee/posts/welcome-to-star-coffee/">Welcome to Star Coffee</a> <a class="sidebar-nav-item " href="/starcoffee/posts/projects/">Projects</a> <a class="sidebar-nav-item " href="/starcoffee/posts/satellite-analysis-toolkit/">Satellite Analysis Toolkit</a> <a class="sidebar-nav-item " href="/starcoffee/posts/simple-nn/">Simple NN</a> </nav> <div class=sidebar-item > <p>&copy; Michal Jagodzinski.</p> </div> </div> <!-- Wrap is the content to shift when toggling the sidebar. We wrap the content to avoid any CSS collisions with our real content. --> <div class=wrap > <div class=masthead > <div class=container > <h3 class=masthead-title > <a href="/starcoffee/" title=Home >Star Coffee</a> <small>Writing about stuff, working in public</small> </h3> </div> </div> <div class="container content"> <div class=franklin-content ><h1 id=dynamically_listing_blog_posts ><a href="#dynamically_listing_blog_posts" class=header-anchor >Dynamically Listing Blog Posts</a></h1> <p><em>By Michal Jagodzinski - April 20th, 2023</em></p> <p>Welcome back to Star Coffee&#33; This will be a short post about the system I wrote to dynamically generate the list of posts for this blog.</p> <p>My old system of listing blog posts, such as on my <a href="https://michaszj.github.io/starcoffee/">homepage</a> or on <a href="https://michaszj.github.io/starcoffee/posts/satellite-analysis-toolkit/">project pages</a>, was to manually type out the link and date for each post. It worked and didn&#39;t take too long to do, but I&#39;m lazy. So I decided to automate this work.</p> <h2 id=the_code ><a href="#the_code" class=header-anchor >The Code</a></h2> <p>Since I am using <a href="https://franklinjl.org/">Franklin.jl</a> to build this site, I can automate this task using Julia. I initially planned to just use <a href="https://scientificcoder.com/">Matthijs Cox&#39;s</a> code that he uses on his blog <a href="https://www.functionalnoise.com/">Functional Noise</a>, but I found that it did not fully suit my needs. He did a lot of the initial heavy lifting for me, so credits to his work.</p> <p>The following code is inside of the <code>utils.jl</code> file in the main directory of my <code>Franklin.jl</code> project. See the following <code>Franklin.jl</code> documentation to learn more about this code: <a href="https://franklinjl.org/syntax/utils/">Utils</a>. First, I define a struct to contain the metadata of each blog post:</p> <pre><code class="julia hljs"><span class=hljs-keyword >struct</span> PostInfo
+    title::<span class=hljs-built_in >String</span>
+    pagename::<span class=hljs-built_in >String</span>
+    date::<span class=hljs-built_in >String</span>
+    tags::<span class=hljs-built_in >String</span>
+<span class=hljs-keyword >end</span></code></pre> <p>For reference, here is the metadata that I include in the markdown files for each blog post:</p> <pre><code class="julia hljs"><span class=hljs-meta >@def</span> title = <span class=hljs-string >&quot;Dynamically Listing Blog Posts&quot;</span>
+<span class=hljs-meta >@def</span> published = <span class=hljs-string >&quot;April 20th, 2023&quot;</span>
+<span class=hljs-meta >@def</span> tags = [<span class=hljs-string >&quot;Julia&quot;</span>, <span class=hljs-string >&quot;Programming&quot;</span>, <span class=hljs-string >&quot;Blogging&quot;</span>]</code></pre> <p>Next, a function to read in a post&#39;s filename and return a <code>PostInfo</code> struct based on that post:</p> <pre><code class="julia hljs"><span class=hljs-keyword >function</span> get_post_info(post_file)
+    file_path = joinpath(<span class=hljs-string >&quot;./posts&quot;</span>, post_file)
+
+    title = open(file_path) <span class=hljs-keyword >do</span> file
+        read_file = read(file, <span class=hljs-built_in >String</span>)
+        m = match(<span class=hljs-string >r&quot;\@def title = \&quot;(.*?)\&quot;&quot;</span>, read_file)
+        <span class=hljs-keyword >return</span> string(first(m.captures))
+    <span class=hljs-keyword >end</span>
+
+    date = open(file_path) <span class=hljs-keyword >do</span> file
+        read_file = read(file, <span class=hljs-built_in >String</span>)
+        m = match(<span class=hljs-string >r&quot;\@def published = \&quot;(.*?)\&quot;&quot;</span>, read_file)
+        <span class=hljs-keyword >return</span> string(first(m.captures))
+    <span class=hljs-keyword >end</span>
+
+    tags = open(file_path) <span class=hljs-keyword >do</span> file
+        read_file = read(file, <span class=hljs-built_in >String</span>)
+        m = match(<span class=hljs-string >r&quot;\@def published = \&quot;(.*?)\&quot;&quot;</span>, read_file)
+        <span class=hljs-keyword >return</span> string(first(m.captures))
+    <span class=hljs-keyword >end</span>
+
+    pagename = first(splitext(post_file))
+
+    <span class=hljs-keyword >return</span> PostInfo(title, pagename, date, tags)
+<span class=hljs-keyword >end</span></code></pre> <p>Please note the &#92; character in the beginning of each regex string. In the actual code this character is not actually there, I had to put that there as I was getting the following error on compiling the Franklin project:</p> <pre><code class="julia hljs">ERROR: Base.Meta.ParseError(<span class=hljs-string >&quot;\&quot;\\\&quot; is not a unary operator&quot;</span>)</code></pre>
+<p>I am not sure why this is happening but if you are using this code, make sure to remove the three &#92; characters in the <code>get_post_info</code> function.</p>
+<p>Next, some helper functions:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >function</span> strip_tags_str(tags_str::<span class=hljs-built_in >String</span>)
+    <span class=hljs-keyword >return</span> split(replace(tags_str, &#x27;\<span class=hljs-string >&quot;&#x27; =&gt; &quot;</span><span class=hljs-string >&quot;, &quot;</span>, <span class=hljs-string >&quot; =&gt; &quot;</span>,<span class=hljs-string >&quot;), &quot;</span>,<span class=hljs-string >&quot;)
+end</span></code></pre>
+<pre><code class="julia hljs"><span class=hljs-keyword >function</span> parse_date(date_string::<span class=hljs-built_in >String</span>)
+    matches = match(<span class=hljs-string >r&quot;(^\w+)[^\d]*(\d+)[^\d]*(\d+)&quot;</span>, date_string)
+    captures_vec = <span class=hljs-built_in >String</span>.(matches.captures)
+    <span class=hljs-keyword >return</span> Date(
+        parse(<span class=hljs-built_in >Int</span>, captures_vec[<span class=hljs-number >3</span>]),
+        Dates.LOCALES[<span class=hljs-string >&quot;english&quot;</span>].month_value[captures_vec[<span class=hljs-number >1</span>]],
+        parse(<span class=hljs-built_in >Int</span>, captures_vec[<span class=hljs-number >2</span>])
+    )
+<span class=hljs-keyword >end</span></code></pre>
+<p>The first function parses the tags string that gets read in. For reference, here is the tags string for this blog post:</p>
+<pre><code class="julia hljs">[<span class=hljs-string >&quot;Julia&quot;</span>, <span class=hljs-string >&quot;Programming&quot;</span>, <span class=hljs-string >&quot;Blogging&quot;</span>]</code></pre>
+<p>Again, this is the <em>string</em> that is read in by the <code>get_post_info</code> function. The <code>strip_tags_str</code> function takes this string and converts it to a vector of strings of the individual tags.</p>
+<p>Next, the <code>parse_date</code> function converts a date string and converts it into a <code>Date</code> type. For reference, here is the publishing date of this post:</p>
+<pre><code class="julia hljs"><span class=hljs-string >&quot;April 20th, 2023&quot;</span></code></pre>
+<p>This function is somewhat complicated because of the formatting of this string. But I&#39;d like this format to be displayed both on the blog post itself and in the list of posts, which is why I decided to keep this format.</p>
+<p>Finally, the function to actually generate the list of posts:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >function</span> hfun_blogposts(params)
+    tag_filter, sorted = params
+    sorted = parse(<span class=hljs-built_in >Bool</span>, sorted)
+
+    post_section = <span class=hljs-string >&quot;&lt;ul class=blogposts&gt;&quot;</span>
+    list = readdir(<span class=hljs-string >&quot;./posts&quot;</span>)
+
+    post_info = get_post_info.(list)
+
+    <span class=hljs-keyword >if</span> sorted
+        post_dates = [parse_date(info.date) <span class=hljs-keyword >for</span> info <span class=hljs-keyword >in</span> post_info]
+        posts_sorted = post_info[sortperm(post_dates, rev=<span class=hljs-literal >true</span>)]
+    <span class=hljs-keyword >else</span>
+        posts_sorted = post_info
+    <span class=hljs-keyword >end</span>
+
+    <span class=hljs-keyword >for</span> post <span class=hljs-keyword >in</span> posts_sorted
+        <span class=hljs-keyword >if</span> occursin(tag_filter, post.tags)
+            <span class=hljs-keyword >if</span> sorted
+                post_link = <span class=hljs-string >&quot;&lt;p&gt;&lt;a href=\&quot;/posts/<span class=hljs-subst >$(post.pagename)</span>/\&quot;&gt;<span class=hljs-subst >$(post.title)</span>&lt;/a&gt; - <span class=hljs-subst >$(post.date)</span> &lt;/p&gt;&quot;</span>
+            <span class=hljs-keyword >else</span>
+                post_link = <span class=hljs-string >&quot;&lt;p&gt;&lt;a href=\&quot;/posts/<span class=hljs-subst >$(post.pagename)</span>/\&quot;&gt;<span class=hljs-subst >$(post.title)</span>&lt;/a&gt;&lt;/p&gt;&quot;</span>
+            <span class=hljs-keyword >end</span>
+            post_div = <span class=hljs-string >&quot;&lt;li class=postlink&gt;<span class=hljs-variable >$post_link</span>&lt;/li&gt;&quot;</span>
+
+            post_section *= post_div
+        <span class=hljs-keyword >end</span>
+    <span class=hljs-keyword >end</span>
+    post_section *= <span class=hljs-string >&quot;&lt;/ul&gt;&quot;</span>
+<span class=hljs-keyword >end</span></code></pre>
+<p>First thing to note is that this <code>hfun</code> function takes in some parameters, <code>tag_filter</code> and <code>sorted</code>. When I call the function in a markdown file, I can specify a tag to filter by and whether to sort the posts by date. For example, here is the function calls I use in the <a href="https://michaszj.github.io/starcoffee/">homepage</a> of this blog to list project pages and all blog posts:</p>
+<pre><code class="markdown hljs"><span class=hljs-section >## Ongoing Projects</span>
+
+{{ blogposts Project false }}
+
+<span class=hljs-section >## All Posts</span>
+
+{{ blogposts Blogging true }}</code></pre>
+<p>I wanted to have a customizable method of listing blog posts. For the <a href="https://michaszj.github.io/starcoffee/#ongoing_projects">Ongoing Projects</a> section of my homepage, I wanted the project pages &#40;each with the tag &quot;Project&quot;&#41; to not be sorted by publishing date. On the other hand, for the <a href="https://michaszj.github.io/starcoffee/#all_posts">All Posts</a> section, I did want the posts sorted by date. I also did not want to include project pages in my list of blog posts, as they are not really blog posts, they are closer to showcases or documentation. This is why I defined the <code>hfun_blogposts</code> in this way, allowing for arbitrary filtering and sorting.</p>
+<h2 id=wrapping_up ><a href="#wrapping_up" class=header-anchor >Wrapping Up</a></h2>
+<p>Thanks for reading, I hope this post was useful. This is the system I am using as of writing for this <code>Franklin.jl</code> blog. Feel free to adapt my code for your own, it seems to work well enough for me.</p>
+<p>I will be back with some more aerospace engineering stuff soon. Until next time.</p>
+<div class=page-foot >
+    <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <a href="https://michaszj.github.io/">Michal Jagodzinski</a>. Last modified: April 20, 2023.
+    <br>Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+</div>
+</div>
+      </div>  
+    </div> 
+    
+    
+        <script src="/starcoffee/libs/highlight/highlight.min.js"></script>
+<script>hljs.highlightAll();hljs.configure({tabReplace: '    '});</script>
+
+    
+    <label for=sidebar-checkbox  class=sidebar-toggle ></label>
