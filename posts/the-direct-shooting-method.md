@@ -1,6 +1,10 @@
+@def title = "The Direct Shooting Method"
+@def published = "April 3rd, 2023"
+@def tags = ["Julia", "Programming", "Blogging", "Optimal Control"]
+
 # The Direct Shooting Method
 
-_April 3rd, 2023_
+_By Michal Jagodzinski - April 3rd, 2023_
 
 \tableofcontents
 

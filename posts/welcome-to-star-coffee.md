@@ -1,6 +1,10 @@
+@def title = "Welcome to Star Coffee"
+@def published = "April 2nd, 2023"
+@def tags = ["Blogging"]
+
 # Welcome to Star Coffee
 
-_April 2nd, 2023_
+_By Michal Jagodzinski - April 2nd, 2023_
 
 Welcome to Star Coffee, this site serves as my place to document work on projects and writings about random, rough ideas. Check out my [Substack publication](https://michaszj.substack.com/) for more refined articles.
 

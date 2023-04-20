@@ -1,6 +1,10 @@
+@def title = "Simple NN Showcase"
+@def published = "April 6th, 2023"
+@def tags = ["Julia", "Programming", "Blogging", "Machine Learning", "Simple NN"]
+
 # Simple NN Showcase
 
-_April 6th, 2023_
+_By Michal Jagodzinski - April 6th, 2023_
 
 <!-- @def reeval = true -->
 

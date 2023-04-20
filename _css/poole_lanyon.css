@@ -13,7 +13,6 @@
  * https://github.com/poole/poole.
  */
 
-
 /*
  * Contents
  *
@@ -27,7 +26,6 @@
  * Reverse layout
  * Themes
  */
-
 
 /*
  * Body resets
@@ -117,7 +115,6 @@ strong {
   color: #303030;
 }
 
-
 /* Lists */
 ul,
 ol,
@@ -194,7 +191,6 @@ tbody tr:nth-child(odd) th {
   margin-right: auto;
 }
 
-
 /*
  * Masthead
  *
@@ -239,7 +235,6 @@ tbody tr:nth-child(odd) th {
  * https://github.com/poole/lanyon.
  */
 
-
 /*
  * Contents
  *
@@ -253,7 +248,6 @@ tbody tr:nth-child(odd) th {
  * Themes
  */
 
-
 /*
  * Global resets
  *
@@ -266,9 +260,9 @@ body {
   overflow-x: hidden;
 }
 
-html {
+/* html {
   font-family: "PT Serif", Georgia, "Times New Roman", serif;
-}
+} */
 
 h1,
 h2,
@@ -276,12 +270,11 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  /* font-family: "PT Sans", Helvetica, Arial, sans-serif; */
   font-weight: 400;
   color: #313131;
   letter-spacing: -0.025rem;
 }
-
 
 /*
  * Wrapper
@@ -296,7 +289,6 @@ h6 {
   width: 100%;
 }
 
-
 /*
  * Container
  *
@@ -307,18 +299,17 @@ h6 {
   max-width: 28rem;
 }
 
-@media (min-width: 38rem) {
+@media (min-width: 40rem) {
   .container {
-    max-width: 32rem;
+    max-width: 34rem;
   }
 }
 
 @media (min-width: 56rem) {
   .container {
-    max-width: 38rem;
+    max-width: 42rem;
   }
 }
-
 
 /*
  * Masthead
@@ -360,7 +351,6 @@ h6 {
   }
 }
 
-
 /*
  * Sidebar
  *
@@ -385,7 +375,7 @@ h6 {
   width: 14rem;
   visibility: hidden;
   overflow-y: auto;
-  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  /* font-family: "PT Sans", Helvetica, Arial, sans-serif; */
   font-size: 0.875rem; /* 15px */
   color: rgba(255, 255, 255, 0.6);
   background-color: #202020;
@@ -495,7 +485,6 @@ a.sidebar-nav-item:focus {
   }
 }
 
-
 /* Slide effect
  *
  * Handle the sliding effects of the sidebar and content in one spot, seperate
@@ -536,5 +525,5 @@ a.sidebar-nav-item:focus {
 }
 
 code {
-  font-size: 16px;
+  font-size: 13px;
 }

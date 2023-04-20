@@ -1,6 +1,10 @@
+@def title = "SAT Work Log 2"
+@def published = "April 4th, 2023"
+@def tags = ["Julia", "Programming", "Blogging", "Satellite Analysis Toolkit", "Work Log"]
+
 # SAT Work Log 2
 
-_Work Log - April 4th, 2023_
+_By Michal Jagodzinski - Work Log - April 4th, 2023_
 
 \tableofcontents
 

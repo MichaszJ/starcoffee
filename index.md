@@ -14,18 +14,12 @@ Welcome to Star Coffee, this site serves as my place to document work on project
 
 Feel free to reach out on [Twitter](https://twitter.com/astra_kawa) or [LinkedIn](https://www.linkedin.com/in/michal-jagodzinski-6860201aa/), I'm always happy to chat about my work!
 
+I'm currently looking for work in the aerospace and software industries in Ontario, as well as looking into doing an M.Eng. or M.ASc. in the spacecraft GN&C field. If you are looking an aerospace engineer for work or research, please see my [resume](https://michaszj.github.io/documents/web-resume.html) or send me a message on [LinkedIn](https://www.linkedin.com/in/michal-jagodzinski-6860201aa/).
+
 ## Ongoing Projects
 
-- [Satellite Analysis Toolkit](/posts/satellite-analysis-toolkit/)
-- [Simple NN](/posts/simple-nn/)
+{{ blogposts Project false }}
 
 ## All Posts
 
-- [SAT Work Log 5](/posts/sat-work-log-5/) - April 17th, 2023
-- [SAT Work Log 4](/posts/sat-work-log-4/) - April 13th, 2023
-- [SAT Work Log 3](/posts/sat-work-log-3/) - April 7th, 2023
-- [Simple NN Showcase](/posts/simple-nn-showcase/) - April 6th, 2023
-- [SAT Work Log 2](/posts/sat-work-log-2/) - April 4th, 2023
-- [The Direct Shooting Method](/posts/the-direct-shooting-method/) - April 3rd, 2023
-- [Getting Started on SAT](/posts/getting-started-on-sat/) - April 2nd, 2023
-- [Welcome to Star Coffee](/posts/welcome-to-star-coffee/) - April 2nd, 2023
+{{ blogposts Blogging true }}

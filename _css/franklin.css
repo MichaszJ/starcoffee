@@ -5,6 +5,8 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
 
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
 /* ==================================================================
     VARIABLES
 ================================================================== */
@@ -22,7 +24,8 @@
 ================================================================== */
 
 html {
-  font-family: "Open Sans", sans-serif !important;
+  /* font-family: "Open Sans", sans-serif !important; */
+  font-family: "Cormorant Garamond", serif !important;
   font-size: var(--normal);
   color: var(--text-color);
 }
@@ -68,7 +71,7 @@ html {
 
 .page-foot {
   font-size: 80%;
-  font-family: Arial, serif;
+  /* font-family: Arial, serif; */
   color: #a6a2a0;
   text-align: center;
   margin-top: 6em;
@@ -302,7 +305,7 @@ body {
 }
 
 .katex {
-  font-size: 1em !important;
+  font-size: 1em;
 }
 
 .katex-display .katex {
@@ -349,7 +352,8 @@ code {
 /* font-size: 90%; } */
 
 .hljs {
-  font-size: var(--small);
+  /* font-size: var(--small); */
+  font-size: 13px;
   line-height: 1.35em;
   border-radius: 10px;
 }
@@ -416,4 +420,5 @@ code {
   text-align: center;
   font-size: medium;
   margin-bottom: 19px;
+  font-style: italic;
 }

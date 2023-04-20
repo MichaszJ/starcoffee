@@ -1,6 +1,10 @@
+@def title = "SAT Work Log 3"
+@def published = "April 7th, 2023"
+@def tags = ["Julia", "Programming", "Blogging", "Satellite Analysis Toolkit", "Work Log"]
+
 # SAT Work Log 3
 
-_Work Log - April 7th, 2023_
+_By Michal Jagodzinski - Work Log - April 7th, 2023_
 
 <!-- @def reeval = true -->
 

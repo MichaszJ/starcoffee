@@ -1,6 +1,10 @@
+@def title = "Getting Started on SAT"
+@def published = "April 2nd, 2023"
+@def tags = ["Julia", "Programming", "Blogging", "Satellite Analysis Toolkit", "Work Log"]
+
 # Getting Started on SAT
 
-_Work Log - April 2nd, 2023_
+_By Michal Jagodzinski - Work Log - April 2nd, 2023_
 
 The [Satellite Analysis Toolkit](https://github.com/MichaszJ/satellite-analysis-toolkit) (SAT) is my latest project I've been working on for the past couple days as of writing. It's based on an older project of mine called [Orbit Tool](https://github.com/MichaszJ/orbit-tool). Orbit Tool is a pretty simple [Streamlit](https://streamlit.io/) app that simulates orbits and plots ground tracks of satellites around Earth. I've been wanting to expand on Orbit Tool but found Streamlit a bit limiting for my needs. I attempted to rewrite the project [using Julia and Genie.jl](https://github.com/MichaszJ/orbit-tool-v2), but I found using Genie a little convoluted and did not make too much progress.
 
