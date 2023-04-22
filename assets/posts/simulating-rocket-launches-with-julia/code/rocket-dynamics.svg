@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 1000 600" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g transform="matrix(1,0,0,1,-250,-569.631)">
+        <path d="M295.276,998.679C632.488,994.021 1028.94,1095.74 1204.72,1145.67" style="fill:none;stroke:rgb(13,202,242);stroke-width:4.17px;"/>
+    </g>
+    <g transform="matrix(1,0,0,1,-250,-569.631)">
+        <g transform="matrix(1,-0,-0,1,250,569.631)">
+            <path d="M148.355,238.067L151.493,231.823L154.605,238.08C153.046,236.514 149.921,236.507 148.355,238.067Z"/>
+            <path d="M151.083,429.048C151.083,429.048 151.419,267.51 151.483,236.823" style="fill:none;stroke:black;stroke-width:2.08px;"/>
+        </g>
+    </g>
+    <g transform="matrix(1,0,0,1,-252.577,-569.531)">
+        <g transform="matrix(1,-0,-0,1,252.577,569.531)">
+            <circle cx="151.631" cy="429.148" r="3.125"/>
+            <path d="M342.834,426.023L349.084,429.148L342.834,432.273C344.396,430.71 344.396,427.585 342.834,426.023Z"/>
+            <path d="M153.506,429.148L344.084,429.148" style="fill:none;stroke:black;stroke-width:2.08px;"/>
+        </g>
+    </g>
+    <g transform="matrix(1,0,0,1,-250,-569.631)">
+        <path d="M401.493,998.679C400.962,788.486 496.77,794.738 674.933,733.88" style="fill:none;stroke:black;stroke-width:2.08px;stroke-dasharray:20.83,20.83,0,0;"/>
+    </g>
+    <g transform="matrix(0.209567,0.694119,-0.694119,0.209567,816.525,-378.132)">
+        <g transform="matrix(0.248064,0,0,0.996533,420.832,16.2172)">
+            <rect x="523.794" y="550.565" width="77.867" height="147.684" style="fill:rgb(205,205,205);"/>
+        </g>
+        <path d="M560.425,534.225L570.083,564.874L550.767,564.874L560.425,534.225Z" style="fill:rgb(205,205,205);"/>
+        <g transform="matrix(1,0,0,1.55384,-2.25496,-444.208)">
+            <path d="M562.68,738.254L570.083,750L555.277,750L562.68,738.254Z" style="fill:rgb(205,205,205);"/>
+        </g>
+    </g>
+    <g transform="matrix(1,0,0,1,90.2001,-854.744)">
+        <g transform="matrix(1,-0,-0,1,-90.2001,854.744)">
+            <path d="M685.611,140.81L691.861,143.935L685.611,147.06C687.174,145.498 687.174,142.373 685.611,140.81Z"/>
+            <path d="M586.993,143.935L686.861,143.935" style="fill:none;stroke:black;stroke-width:2.08px;"/>
+        </g>
+    </g>
+    <g transform="matrix(0.957319,-0.289032,0.289032,0.957319,-181.331,-696.194)">
+        <g transform="matrix(0.957319,0.289032,-0.289032,0.957319,-27.6301,718.891)">
+            <path d="M676.414,84.776L683.3,85.962L678.22,90.76C679.265,88.812 678.361,85.821 676.414,84.776Z"/>
+            <path d="M582.491,116.398C582.491,116.398 658.492,93.452 678.514,87.407" style="fill:none;stroke:black;stroke-width:2.08px;"/>
+        </g>
+    </g>
+    <g transform="matrix(1,0,0,1,-98.7652,-169.762)">
+        <text x="387.18px" y="570.63px" style="font-family:'JuliaMono-Regular', 'JuliaMono', monospace;font-size:20.833px;">Downrange</text>
+        <g transform="matrix(20.8333,0,0,20.8333,487.18,591.463)">
+        </g>
+        <text x="387.18px" y="591.463px" style="font-family:'JuliaMono-Regular', 'JuliaMono', monospace;font-size:20.833px;">Distance</text>
+    </g>
+    <g transform="matrix(1,0,0,1,-254.077,-535.782)">
+        <g transform="matrix(20.8333,0,0,20.8333,411.409,758.68)">
+        </g>
+        <text x="398.909px" y="758.68px" style="font-family:'JuliaMono-Regular', 'JuliaMono', monospace;font-size:20.833px;">y</text>
+    </g>
+    <g transform="matrix(1,0,0,1,-315.139,-530.508)">
+        <g transform="matrix(20.8333,0,0,20.8333,1238.25,616.47)">
+        </g>
+        <text x="1000.75px" y="616.47px" style="font-family:'JuliaMono-Regular', 'JuliaMono', monospace;font-size:20.833px;">Tangential Velocity</text>
+    </g>
+    <g transform="matrix(1,0,0,1,-361.066,-679.628)">
+        <g transform="matrix(16.6667,0,0,16.6667,1119.04,814.012)">
+        </g>
+        <text x="949.039px" y="814.012px" style="font-family:'JuliaMono-Regular', 'JuliaMono', monospace;font-size:16.667px;">Flight Path Angle</text>
+    </g>
+    <g transform="matrix(1,0,0,1,-316.533,-502.084)">
+        <path d="M899.024,618.482C902.105,625.151 903.825,632.575 903.825,640.398C903.825,642.297 903.724,644.173 903.526,646.02L807.816,646.02L899.024,618.482Z" style="fill:none;stroke:black;stroke-width:2.08px;"/>
+    </g>
+    <g transform="matrix(1,0,0,1,-305.855,-533.344)">
+        <g transform="matrix(20.8333,0,0,20.8333,1078.81,700.236)">
+        </g>
+        <text x="916.31px" y="700.236px" style="font-family:'JuliaMono-Regular', 'JuliaMono', monospace;font-size:20.833px;">Local Horizon</text>
+    </g>
+    <g transform="matrix(1,0,0,1,-501.99,-299.04)">
+        <g transform="matrix(20.8333,0,0,20.8333,1100.75,616.47)">
+        </g>
+        <text x="1000.75px" y="616.47px" style="font-family:'JuliaMono-Regular', 'JuliaMono', monospace;font-size:20.833px;">Altitude</text>
+    </g>
+    <g transform="matrix(0.993035,0,0,0.986997,-244.83,-558.386)">
+        <g transform="matrix(1.00701,-0,-0,1.01317,246.547,565.742)">
+            <path d="M495.399,461.066L492.274,467.316L489.149,461.066C490.712,462.628 493.837,462.628 495.399,461.066Z"/>
+            <path d="M492.274,143.935L492.274,462.316" style="fill:none;stroke:black;stroke-width:2.08px;"/>
+        </g>
+    </g>
+</svg>
