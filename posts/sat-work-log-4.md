@@ -1,6 +1,6 @@
 @def title = "SAT Work Log 4"
 @def published = "April 13th, 2023"
-@def tags = ["Julia", "Programming", "Blogging", "Satellite Analysis Toolkit", "Work Log"]
+@def tags = ["Julia", "Programming", "Aerospace", "Blogging", "Satellite Analysis Toolkit", "Work Log"]
 
 # SAT Work Log 4
 

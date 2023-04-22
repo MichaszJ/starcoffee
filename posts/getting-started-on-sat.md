@@ -1,6 +1,6 @@
 @def title = "Getting Started on SAT"
 @def published = "April 2nd, 2023"
-@def tags = ["Julia", "Programming", "Blogging", "Satellite Analysis Toolkit", "Work Log"]
+@def tags = ["Julia", "Programming", "Aerospace", "Blogging", "Satellite Analysis Toolkit", "Work Log"]
 
 # Getting Started on SAT
 

@@ -1,6 +1,6 @@
 @def title = "Satellite Analysis Toolkit"
 @def published = "April 2nd, 2023"
-@def tags = ["Project"]
+@def tags = ["Project", "Aerospace"]
 
 # Satellite Analysis Toolkit
 
