@@ -1,0 +1,472 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=preconnect  href="https://fonts.googleapis.com"> <link rel=preconnect  href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel=stylesheet > <link rel=stylesheet  href="/starcoffee/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/starcoffee/css/franklin.css"> <link rel=stylesheet  href="/starcoffee/css/poole_lanyon.css"> <link rel=stylesheet  href="/starcoffee/css/adjust.css"> <link rel=icon  href="/starcoffee/assets/favicon.png"> <title>Rocket Launch Industry Data Visualizations</title> <input type=checkbox  class=sidebar-checkbox  id=sidebar-checkbox > <div class=sidebar  id=sidebar > <div class=sidebar-item > <p>Star Coffee</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/starcoffee/">Home</a> <a class="sidebar-nav-item " href="/starcoffee/posts/welcome-to-star-coffee/">Welcome to Star Coffee</a> <a class="sidebar-nav-item " href="/starcoffee/posts/projects/">Projects</a> <a class="sidebar-nav-item " href="/starcoffee/posts/satellite-analysis-toolkit/">Satellite Analysis Toolkit</a> <a class="sidebar-nav-item " href="/starcoffee/posts/simple-nn/">Simple NN</a> </nav> <div class=sidebar-item > <p>&copy; Michal Jagodzinski.</p> </div> </div> <!-- Wrap is the content to shift when toggling the sidebar. We wrap the content to avoid any CSS collisions with our real content. --> <div class=wrap > <div class=masthead > <div class=container > <h3 class=masthead-title > <a href="/starcoffee/" title=Home >Star Coffee</a> <small>Writing about stuff, working in public</small> </h3> </div> </div> <div class="container content"> <div class=franklin-content ><h1 id=rocket_launch_industry_data_visualizations ><a href="#rocket_launch_industry_data_visualizations" class=header-anchor >Rocket Launch Industry Data Visualizations</a></h1> <p><em>By Michal Jagodzinski - April 24th, 2023</em></p> <div class=franklin-toc ><ol><li><a href="#looking_at_the_data">Looking at the Data</a><li><a href="#creating_the_first_visualization">Creating the First Visualization</a><li><a href="#diving_deeper">Diving Deeper</a><li><a href="#some_more_visualizations">Some More Visualizations</a><ol><li><a href="#organisation_rate_of_failure_visualization">Organisation Rate of Failure Visualization</a><li><a href="#rocket_payload_and_cost_visualization">Rocket Payload and Cost Visualization</a></ol><li><a href="#conclusion">Conclusion</a></ol></div> <div class=im-100 ><img src="https://source.unsplash.com/qdBLpTGXPas" alt="" /></div> <div class=img-caption >Photo by <a href="https://unsplash.com/photos/qdBLpTGXPas">Wolfgang Hasselmann</a></div> <p>Hello and welcome back to Star Coffee&#33; I&#39;m delving into a new topic today, data visualization using Julia. I am going to be visualizing some data about the rocket launch industry using <code>AlgebraOfGraphics.jl</code>, a <a href="https://www.amazon.com/Grammar-Graphics-Statistics-Computing/dp/0387245448/">Grammar of Graphics</a> visualization library build on top of <code>Makie.jl</code>. To do various data operations, I will be using <code>Tidier.jl</code>, a library built on top of <code>DataFrames.jl</code> to bring <a href="https://www.tidyverse.org/">tidyverse</a>-style data manipulation to Julia.</p> <p><code>AlgebraOfGraphics.jl</code> is based on <a href="https://www.amazon.com/Grammar-Graphics-Statistics-Computing/dp/0387245448/">The Grammar of Graphics</a>, a methodology for creating quantitative graphics. <code>AlgebraOfGraphics</code> is very similar to <a href="https://ggplot2.tidyverse.org/">R&#39;s ggplot2</a> library. I&#39;ve used ggplot2 before various times, and it is incredible how easy it is to make some complex visualizations using it, and I&#39;m glad the Julia ecosystem has an equivalent plotting library.</p> <p>I am writing this post as I wanted to test out the capabilities of both <code>AlgebraOfGraphics.jl</code> and <code>Tidier.jl</code>. I have been interested in checking out both libraries for a bit now, but I haven&#39;t gotten the opportunity to. Lately I&#39;ve been trying to improve my data visualization skills, so I decided to try these libraries out to visualize some interesting data. I&#39;m also interested to see how <code>AlgebraOfGraphics.jl</code> stacks up to my preferred data visualization tool, <a href="https://ggplot2.tidyverse.org/">ggplot2</a>.</p> <p>Data source: <a href="https://www.kaggle.com/datasets/maccaroo/rocket-launch-industry">Rocket Launch Industry</a> on Kaggle.</p> <h2 id=looking_at_the_data ><a href="#looking_at_the_data" class=header-anchor >Looking at the Data</a></h2> <p>Importing required libraries:</p> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> AlgebraOfGraphics, CairoMakie, Tidier, DataFrames, CSV
+set_aog_theme!()</code></pre> <p>Importing the data and getting an overview:</p> <pre><code class="julia hljs">launch_data = CSV.read(<span class=hljs-string >&quot;./data/Launches.csv&quot;</span>, DataFrame)
+describe(launch_data)</code></pre> <pre><code class="plaintext hljs">16×7 DataFrame
+ Row │ variable                    mean       min                                median      max                                nmissing  eltype
+     │ Symbol                      Union…     Any                                Any         Any                                Int64     Type
+─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   1 │ Launch Id                   3446.81    3                                  3481.5      6886                                      0  Int64
+   2 │ Launch Time                            1957-10-04 19:28:00+00:00                      2021-12-30 03:30:00+00:00                 0  String31
+   3 │ Launch Status                          Failure                                        Success                                   0  String31
+   4 │ Launch Suborbital                      Orbital                                        Orbital                                   0  String7
+   5 │ Rocket Name                            ASLV                                           ZhuQue-1                                  0  String31
+   6 │ Rocket Organisation                    ABMA                                           i-Space                                   0  String31
+   7 │ Rocket Price                79.7566    2.5                                29.75       3000.0                                 3896  Union{Missing, Float64}
+   8 │ Rocket Payload to LEO       8137.31    1.0                                6200.0      140000.0                                849  Union{Missing, Float64}
+   9 │ Location                               Brigitte, Hammaguir, Algeria, Fr…              Xichang Satellite Launch Center,…         0  String
+  10 │ Launch Year                 1988.65    1957                               1986.0      2021                                      0  Int64
+  11 │ Launch Year Mon                        1957-10-01                         1986-08-01  2021-12-01                                0  Date
+  12 │ USD/kg to LEO               89101.0    14106.6                            30952.4     1.06667e6                              3928  Union{Missing, Float64}
+  13 │ 2021 Mult                   3.62512    1.0                                2.47235     9.64306                                   0  Float64
+  14 │ USD/kg to LEO CPI Adjusted  1.54886e5  14951.5                            92255.9     2.21144e6                              3928  Union{Missing, Float64}
+  15 │ Rocket Price CPI Adjusted   172.61     2.5                                56.4983     9410.93                                3896  Union{Missing, Float64}
+  16 │ Dum                         1.0        1                                  1.0         1                                         0  Int64</code></pre> <p>It&#39;s always good to do a preliminary analysis of the data to get some insights. For instance, we can see the latest date in this dataset is December 12th, 2021, meaning we are missing over a year&#39;s worth of data as of writing. We can also see some columns have significant numbers of missing values, something we&#39;ll need to account for when doing some data operations.</p> <p>First, I&#39;ll rename some columns to work better with <code>Tidier</code> and <code>AlgebraOfGraphics</code>:</p> <pre><code class="julia hljs">rename!(launch_data,
+    <span class=hljs-string >&quot;Rocket Organisation&quot;</span> =&gt; :Rocket_Organisation,
+    <span class=hljs-string >&quot;Launch Status&quot;</span> =&gt; :Launch_Status,
+    <span class=hljs-string >&quot;USD/kg to LEO&quot;</span> =&gt; :USD_kg_to_LEO,
+    <span class=hljs-string >&quot;Rocket Price&quot;</span> =&gt; :Rocket_Price,
+    <span class=hljs-string >&quot;Rocket Payload to LEO&quot;</span> =&gt; :Rocket_Payload,
+    <span class=hljs-string >&quot;Rocket Price CPI Adjusted&quot;</span> =&gt; :Rocket_Price_Adjusted
+);</code></pre> <p>Let&#39;s visualize the number of launches grouped by the launch organisation. Before visualizing, let&#39;s take a closer look at some specific parts of the data. Let&#39;s see how many launch organisations are included in this dataset:</p> <pre><code class="julia hljs">size(unique(launch_data.Rocket_Organisation))</code></pre>
+<pre><code class="plaintext hljs">(55,)</code></pre>
+<p>There are 55 different organisations listed in this dataset, so we&#39;ll need to filter most out to ensure our visualization doesn&#39;t end up a hard-to-read mess. Next, let&#39;s use <code>Tidier</code> to count the number of launches by organisation and filter the ones with more than 140 launches &#40;giving us a round 10 organisations&#41;:</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> launch_data <span class=hljs-keyword >begin</span>
+    <span class=hljs-meta >@group_by</span>(Rocket_Organisation)
+    <span class=hljs-meta >@summarize</span>(Launches = nrow())
+    <span class=hljs-meta >@filter</span>(Launches &gt; <span class=hljs-number >140</span>)
+    <span class=hljs-meta >@arrange</span>(desc(Launches))
+<span class=hljs-keyword >end</span></code></pre>
+<pre><code class="plaintext hljs">10×2 DataFrame
+ Row │ Rocket_Organisation  Launches
+     │ String31             Int64
+─────┼───────────────────────────────
+   1 │ RVSN USSR                2452
+   2 │ US Air Force              548
+   3 │ CASC                      414
+   4 │ Roscosmos                 344
+   5 │ VKS RF                    318
+   6 │ Arianespace               289
+   7 │ General Dynamics          250
+   8 │ NASA                      204
+   9 │ ULA                       147
+  10 │ SpaceX                    142</code></pre>
+<p>That&#39;s a lot of rockets, especially from the USSR. Next let&#39;s get a filtered version of the data for plotting, as well as the ordered vector of launch organisations:</p>
+<pre><code class="julia hljs">nlaunch_data = <span class=hljs-meta >@chain</span> launch_data <span class=hljs-keyword >begin</span>
+    <span class=hljs-meta >@group_by</span>(Rocket_Organisation)
+    <span class=hljs-meta >@mutate</span>(n = nrow())
+    <span class=hljs-meta >@filter</span>(n &gt; <span class=hljs-number >140</span>)
+    <span class=hljs-meta >@filter</span>(Launch_Status != <span class=hljs-string >&quot;Prelaunch Failure&quot;</span>)
+    <span class=hljs-meta >@ungroup</span>
+    <span class=hljs-meta >@arrange</span>(desc(n))
+<span class=hljs-keyword >end</span>
+
+nlaunch_order = <span class=hljs-meta >@chain</span> launch_data <span class=hljs-keyword >begin</span>
+    <span class=hljs-meta >@group_by</span>(Rocket_Organisation)
+    <span class=hljs-meta >@summarize</span>(n = nrow())
+    <span class=hljs-meta >@filter</span>(n &gt; <span class=hljs-number >140</span>)
+    <span class=hljs-meta >@arrange</span>(desc(n))
+<span class=hljs-keyword >end</span>
+
+nlaunch_order = <span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >String</span>}(
+    nlaunch_order.Rocket_Organisation
+)</code></pre>
+<h2 id=creating_the_first_visualization ><a href="#creating_the_first_visualization" class=header-anchor >Creating the First Visualization</a></h2>
+<p>Finally, let&#39;s visualize this data using the <code>filtered_data</code> DataFrame:</p>
+<pre><code class="julia hljs">fig1_axis = (
+    xticklabelrotation=<span class=hljs-literal >π</span>/<span class=hljs-number >4</span>,
+    xlabel=<span class=hljs-string >&quot;&quot;</span>,
+    ylabel=<span class=hljs-string >&quot;Number of Launches&quot;</span>,
+)
+
+colour_sort = [<span class=hljs-string >&quot;Success&quot;</span>, <span class=hljs-string >&quot;Partial Failure&quot;</span>, <span class=hljs-string >&quot;Failure&quot;</span>]
+colours = [<span class=hljs-string >colorant&quot;#003f5c&quot;</span>, <span class=hljs-string >colorant&quot;#ffa600&quot;</span>, <span class=hljs-string >colorant&quot;#ff6361&quot;</span>]
+
+fig1_layers = data(nlaunch_data) *
+    mapping(
+        :Rocket_Organisation =&gt; sorter(nlaunch_order),
+        color=:Launch_Status =&gt; sorter(colour_sort) =&gt; <span class=hljs-string >&quot;Launch Status&quot;</span>,
+        row=:Launch_Status =&gt; sorter(colour_sort)) *
+    frequency()
+
+fig1 = Figure(resolution=(<span class=hljs-number >800</span>,<span class=hljs-number >800</span>))
+
+title_ax = Axis(
+    fig1[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>],
+    title=<span class=hljs-string >&quot;Launches of Major Rocket Organisations&quot;</span>,
+    subtitle=<span class=hljs-string >&quot;Number of launches by launch status from 1957 to 2021&quot;</span>
+)
+hidedecorations!(title_ax)
+
+draw!(
+    fig1,
+    fig1_layers;
+    axis=fig1_axis,
+    facet=(; linkyaxes=:none),
+    palettes=(; color=colours)
+)</code></pre>
+<div class=im-75 ><img src="/starcoffee/assets/posts/visualizing-rocket-data/code/launches.svg" alt=""></div>
+<p>Now it&#39;s a lot more evident just the sheer magnitude of rockets the USSR has launched based on this visualization. Also notice the lack of failures for ULA.</p>
+<p>In contrast, here&#39;s the equivalent plot made with ggplot:</p>
+<pre><code class="r hljs">organisation_vector <span class=hljs-operator >&lt;-</span> launch_data <span class=hljs-operator >%&gt;%</span>
+    group_by<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    summarize<span class=hljs-punctuation >(</span>Launches<span class=hljs-operator >=</span>n<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    arrange<span class=hljs-punctuation >(</span>desc<span class=hljs-punctuation >(</span>Launches<span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    head<span class=hljs-punctuation >(</span><span class=hljs-number >10</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    pull<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >)</span>
+
+fig1_data <span class=hljs-operator >&lt;-</span> launch_data <span class=hljs-operator >%&gt;%</span>
+    mutate<span class=hljs-punctuation >(</span>
+        Rocket_Organisation<span class=hljs-operator >=</span>factor<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >,</span> levels<span class=hljs-operator >=</span>organisation_vector<span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        Launch_Status<span class=hljs-operator >=</span>factor<span class=hljs-punctuation >(</span>Launch_Status<span class=hljs-punctuation >,</span> levels<span class=hljs-operator >=</span><span class=hljs-built_in >c</span><span class=hljs-punctuation >(</span><span class=hljs-string >&quot;Success&quot;</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;Partial Failure&quot;</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;Failure&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    group_by<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >,</span> Launch_Status<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    count<span class=hljs-punctuation >(</span>Launch_Status<span class=hljs-punctuation >,</span> .drop<span class=hljs-operator >=</span><span class=hljs-literal >FALSE</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    filter<span class=hljs-punctuation >(</span>Rocket_Organisation <span class=hljs-operator >%in%</span> organisation_vector<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    filter<span class=hljs-punctuation >(</span>Launch_Status <span class=hljs-operator >!=</span> <span class=hljs-string >&quot;Prelaunch Failure&quot;</span><span class=hljs-punctuation >)</span>
+
+
+fig1 <span class=hljs-operator >&lt;-</span> ggplot<span class=hljs-punctuation >(</span>data<span class=hljs-operator >=</span>fig1_data<span class=hljs-punctuation >,</span> aes<span class=hljs-punctuation >(</span>x<span class=hljs-operator >=</span>Rocket_Organisation<span class=hljs-punctuation >,</span> y<span class=hljs-operator >=</span>n<span class=hljs-punctuation >,</span> fill<span class=hljs-operator >=</span>Launch_Status<span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    geom_col<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    facet_grid<span class=hljs-punctuation >(</span>Launch_Status<span class=hljs-operator >~</span>.<span class=hljs-punctuation >,</span> scales <span class=hljs-operator >=</span> <span class=hljs-string >&quot;free&quot;</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    theme_minimal<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    labs<span class=hljs-punctuation >(</span>
+        title<span class=hljs-operator >=</span><span class=hljs-string >&quot;Launches of Major Rocket Organisations&quot;</span><span class=hljs-punctuation >,</span>
+        subtitle<span class=hljs-operator >=</span><span class=hljs-string >&quot;Number of launches by launch status from 1957 to 2021&quot;</span><span class=hljs-punctuation >,</span>
+        caption<span class=hljs-operator >=</span><span class=hljs-string >&quot;Data compiled by Maciej Krzysik on Kaggle&quot;</span><span class=hljs-punctuation >,</span>
+        y<span class=hljs-operator >=</span><span class=hljs-string >&quot;Number of Launches (1957 - 2021)&quot;</span>
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    theme<span class=hljs-punctuation >(</span>
+        legend.position <span class=hljs-operator >=</span> <span class=hljs-string >&quot;none&quot;</span><span class=hljs-punctuation >,</span>
+        axis.text.x <span class=hljs-operator >=</span> element_text<span class=hljs-punctuation >(</span>angle <span class=hljs-operator >=</span> <span class=hljs-number >45</span><span class=hljs-punctuation >,</span> hjust <span class=hljs-operator >=</span> <span class=hljs-number >1</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        panel.grid.major <span class=hljs-operator >=</span> element_blank<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        axis.title.x <span class=hljs-operator >=</span> element_blank<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    scale_fill_manual<span class=hljs-punctuation >(</span>values<span class=hljs-operator >=</span><span class=hljs-built_in >c</span><span class=hljs-punctuation >(</span><span class=hljs-string >&quot;#003f5c&quot;</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;#ffa600&quot;</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;#ff6361&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span>
+
+fig1</code></pre>
+<div class=im-75 ><img src="/starcoffee/assets/posts/visualizing-rocket-data/code/ggplot-fig1.svg" alt=""></div>
+<p>Unfortunately, I could not replicate a caption on the <code>AlgebraOfGraphics.jl</code> version of this visualization that looked decent.</p>
+<h2 id=diving_deeper ><a href="#diving_deeper" class=header-anchor >Diving Deeper</a></h2>
+<p>Let&#39;s take a closer look at the visualization code to see what&#39;s happening. First, we define an <code>axis</code> tuple to set some axis-specific options:</p>
+<pre><code class="julia hljs">fig1_axis = (
+    xticklabelrotation=<span class=hljs-literal >π</span>/<span class=hljs-number >4</span>,
+    xlabel=<span class=hljs-string >&quot;&quot;</span>,
+    ylabel=<span class=hljs-string >&quot;Number of Launches (1957 - 2021)&quot;</span>,
+)</code></pre>
+<p>Next, we define some vectors to specify the appearance order of the colours, or the <code>Launch_Status</code> column. I wanted the subplots in a specific order instead of the default one, and the <code>color_sort</code> vector is used to specify that order. Then, I define a vector of custom colours for each value of <code>Launch_Status</code>.</p>
+<pre><code class="julia hljs">color_sort = [<span class=hljs-string >&quot;Success&quot;</span>, <span class=hljs-string >&quot;Partial Failure&quot;</span>, <span class=hljs-string >&quot;Failure&quot;</span>]
+colors = [<span class=hljs-string >colorant&quot;#003f5c&quot;</span>, <span class=hljs-string >colorant&quot;#ffa600&quot;</span>, <span class=hljs-string >colorant&quot;#ff6361&quot;</span>]</code></pre>
+<p>Next, we define the <code>AlgebraOfGraphics</code> figure. First, the data source is specified, in this case the <code>nlaunch_data</code> DataFrame:</p>
+<pre><code class="julia hljs">fig1_layers = data(nlaunch_data)</code></pre>
+<p>Next we define the initial mapping of the data, concatenating the <code>fig1_layers</code> variable using the <code>*</code> operator. You can think of mappings as specifying which parts of the data control specific parts of the resulting plot. We want to produce a bar plot showing the frequency of launches by the rocket organisation, so we set the <code>Rocket_Organisation</code> as the independent variable by using it as the first positional argument to the <code>mapping</code> function. We can order mappings using the <code>sorter</code> function, which takes an iterable object as input. This is why I defined the <code>nlaunch_order</code> variable earlier, as by default the values are ordered alphabetically.</p>
+<pre><code class="julia hljs">fig1_layers = data(nlaunch_data) *
+    mapping(
+        :Rocket_Organisation =&gt; sorter(nlaunch_order))</code></pre>
+<p>Next, we define more mappings. I want the colours of the plot to correspond to the <code>Launch_Status</code>, so I map <code>color</code> to that column. I then sort the <code>color</code> mapping by the <code>colour_sort</code>, I want to make sure the colours of the <code>Launch_Status</code> values are in the order of my custom colours. I then rename the title for the mapping, as otherwise the legend would display &quot;Launch_Status&quot;.</p>
+<pre><code class="julia hljs">fig1_layers = data(nlaunch_data) *
+    mapping(
+        :Rocket_Organisation =&gt; sorter(nlaunch_order),
+        color=:Launch_Status =&gt; sorter(colour_sort) =&gt; <span class=hljs-string >&quot;Launch Status&quot;</span>)</code></pre>
+<p>Next, we break the plot apart into three rows of subplots based on the <code>Launch_Status</code> using the <code>row</code> mapping. Alternatively, we could&#39;ve split the plot into three separate columns using the <code>col</code> mapping. Again, I sort the mapping using the <code>colour_sort</code> variable to ensure the <code>Success</code> status comes first and the <code>Failure</code> last.</p>
+<pre><code class="julia hljs">fig1_layers = data(nlaunch_data) *
+    mapping(
+        :Rocket_Organisation =&gt; sorter(nlaunch_order),
+        color=:Launch_Status =&gt; sorter(colour_sort) =&gt; <span class=hljs-string >&quot;Launch Status&quot;</span>,
+        row=:Launch_Status =&gt; sorter(colour_sort))</code></pre>
+<p>To complete our figure, we concatenate the visual layer we are using. In this case, we want a <code>frequency</code> plot:</p>
+<pre><code class="julia hljs">fig1_layers = data(nlaunch_data) *
+    mapping(
+        :Rocket_Organisation =&gt; sorter(nlaunch_order),
+        color=:Launch_Status =&gt; sorter(colour_sort) =&gt; <span class=hljs-string >&quot;Launch Status&quot;</span>,
+        row=:Launch_Status =&gt; sorter(colour_sort)) *
+    frequency()</code></pre>
+<p>Finally we draw the image. When working with <code>AlgebraOfGraphics.jl</code>, you normally don&#39;t need to initialize a <code>Figure</code>. However, the normal way of defining <code>AlgebraOfGraphics.jl</code> plots automatically generates a legend and adds any <code>title</code> or <code>subtitle</code> defined in the <code>axis</code> tuple to be included in each subplot. The next visualizations I&#39;ll showcase do not include this, and are more representative of the &quot;normal&quot; way to make plots with <code>AlgebraOfGraphics.jl</code>.</p>
+<pre><code class="julia hljs">fig1 = Figure(resolution=(<span class=hljs-number >800</span>,<span class=hljs-number >800</span>))
+
+title_ax = Axis(
+    fig1[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>],
+    title=<span class=hljs-string >&quot;Launches of Major Rocket Organisations&quot;</span>,
+    subtitle=<span class=hljs-string >&quot;Number of launches by launch status from 1957 to 2021&quot;</span>
+)
+hidedecorations!(title_ax)
+
+draw!(
+    fig1,
+    fig1_layers;
+    axis=fig1_axis,
+    facet=(; linkyaxes=:none),
+    palettes=(; color=colours)
+)</code></pre>
+<p>Just for reference, here is how the plot would look like if I did not do these extra steps &#40;i.e. the &quot;normal&quot; way&#41;:</p>
+<pre><code class="julia hljs">fig1_scuffed_axis = (
+    width = <span class=hljs-number >500</span>,
+    height = <span class=hljs-number >200</span>,
+    xticklabelrotation=<span class=hljs-literal >π</span>/<span class=hljs-number >4</span>,
+    xlabel=<span class=hljs-string >&quot;&quot;</span>,
+    ylabel=<span class=hljs-string >&quot;Number of Launches&quot;</span>,
+    title=<span class=hljs-string >&quot;Launches of Major Rocket Organisations&quot;</span>,
+    subtitle=<span class=hljs-string >&quot;Number of launches by launch status from 1957 to 2021&quot;</span>
+)
+
+fig1_scuffed = draw(
+    fig1_layers;
+    axis=fig1_scuffed_axis,
+    facet=(; linkyaxes=:none),
+    palettes=(; color=colours)
+)</code></pre>
+<div class=im-75 ><img src="/starcoffee/assets/posts/visualizing-rocket-data/code/launches-scuffed.svg" alt=""></div>
+<p>Yeah, not the greatest plot. The extra titles and legend are unnecessary. But the extra work to fix these problems is not too bad.</p>
+<h2 id=some_more_visualizations ><a href="#some_more_visualizations" class=header-anchor >Some More Visualizations</a></h2>
+<p>Here are a couple more visualizations. I won&#39;t go too in-depth in the code this time around.</p>
+<h3 id=organisation_rate_of_failure_visualization ><a href="#organisation_rate_of_failure_visualization" class=header-anchor >Organisation Rate of Failure Visualization</a></h3>
+<p>Let&#39;s look at the launch statuses a bit more. We can analyze the success rates of the organisations with the most launches, the same ones for the last visualization.</p>
+<pre><code class="julia hljs">rate_data = <span class=hljs-meta >@chain</span> launch_data <span class=hljs-keyword >begin</span>
+    <span class=hljs-meta >@group_by</span>(Rocket_Organisation)
+    <span class=hljs-meta >@summarize</span>(
+        Launches = nrow(),
+        Success = sum(Launch_Status .== <span class=hljs-string >&quot;Success&quot;</span>)
+    )
+    <span class=hljs-meta >@filter</span>(Success &gt; <span class=hljs-number >133</span>)
+    <span class=hljs-meta >@mutate</span>(Success_Rate = <span class=hljs-number >100</span>*Success/Launches)
+    <span class=hljs-meta >@arrange</span>(desc(Success_Rate))
+<span class=hljs-keyword >end</span></code></pre>
+<pre><code class="plaintext hljs">10×4 DataFrame
+ Row │ Rocket_Organisation  Launches  Success  Success_Rate
+     │ String31             Int64     Int64    Float64
+─────┼──────────────────────────────────────────────────────
+   1 │ ULA                       147      146       99.3197
+   2 │ Arianespace               289      278       96.1938
+   3 │ SpaceX                    142      136       95.7746
+   4 │ Roscosmos                 344      326       94.7674
+   5 │ CASC                      414      390       94.2029
+   6 │ NASA                      204      192       94.1176
+   7 │ VKS RF                    318      299       94.0252
+   8 │ RVSN USSR                2452     2260       92.1697
+   9 │ US Air Force              548      487       88.8686
+  10 │ General Dynamics          250      203       81.2</code></pre>
+<pre><code class="julia hljs">rate_axis = (
+    xticklabelrotation=<span class=hljs-literal >π</span>/<span class=hljs-number >4</span>,
+    xlabel=<span class=hljs-string >&quot;&quot;</span>,
+    ylabel=<span class=hljs-string >&quot;Success Rate (%)&quot;</span>,
+)
+
+rate_order = rate_data.Rocket_Organisation
+
+rate_layers = data(rate_data) *
+    mapping(:Rocket_Organisation =&gt; sorter(rate_order), :Success_Rate)
+
+rate_fig = draw(rate_layers; axis=rate_axis)</code></pre>
+<div class=im-75 ><img src="/starcoffee/assets/posts/visualizing-rocket-data/code/rate.svg" alt=""></div>
+<p>Unfortunately, this visualization really did not turn out the way I wanted. It seems <code>AlgebraOfGraphics.jl</code> currently does not support making arbitrary bar graphs, only frequency plots/histograms. The <code>ggplot</code> visualization shows what I was going for:</p>
+<pre><code class="r hljs">options<span class=hljs-punctuation >(</span>repr.plot.width <span class=hljs-operator >=</span> <span class=hljs-number >8</span><span class=hljs-punctuation >,</span> repr.plot.height <span class=hljs-operator >=</span> <span class=hljs-number >5</span><span class=hljs-punctuation >,</span> repr.plot.res<span class=hljs-operator >=</span><span class=hljs-number >300</span><span class=hljs-punctuation >)</span>
+
+fig2_order <span class=hljs-operator >&lt;-</span> launch_data <span class=hljs-operator >%&gt;%</span>
+    filter<span class=hljs-punctuation >(</span>Rocket_Organisation <span class=hljs-operator >%in%</span> organisation_vector<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    group_by<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    summarize<span class=hljs-punctuation >(</span>Launches <span class=hljs-operator >=</span> n<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span> Success <span class=hljs-operator >=</span> <span class=hljs-built_in >sum</span><span class=hljs-punctuation >(</span>Launch_Status <span class=hljs-operator >==</span> <span class=hljs-string >&quot;Success&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    mutate<span class=hljs-punctuation >(</span>Success_Rate <span class=hljs-operator >=</span> <span class=hljs-number >100</span><span class=hljs-operator >*</span>Success<span class=hljs-operator >/</span>Launches<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    arrange<span class=hljs-punctuation >(</span>desc<span class=hljs-punctuation >(</span>Success_Rate<span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    pull<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >)</span>
+
+fig2_data <span class=hljs-operator >&lt;-</span> launch_data <span class=hljs-operator >%&gt;%</span>
+    filter<span class=hljs-punctuation >(</span>Rocket_Organisation <span class=hljs-operator >%in%</span> organisation_vector<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    mutate<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-operator >=</span>factor<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >,</span> levels<span class=hljs-operator >=</span>fig2_order<span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    group_by<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    summarize<span class=hljs-punctuation >(</span>Launches <span class=hljs-operator >=</span> n<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span> Success <span class=hljs-operator >=</span> <span class=hljs-built_in >sum</span><span class=hljs-punctuation >(</span>Launch_Status <span class=hljs-operator >==</span> <span class=hljs-string >&quot;Success&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    mutate<span class=hljs-punctuation >(</span>Success_Rate <span class=hljs-operator >=</span> <span class=hljs-number >100</span><span class=hljs-operator >*</span>Success<span class=hljs-operator >/</span>Launches<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    arrange<span class=hljs-punctuation >(</span>desc<span class=hljs-punctuation >(</span>Success_Rate<span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span>
+
+fig2 <span class=hljs-operator >&lt;-</span> ggplot<span class=hljs-punctuation >(</span>data<span class=hljs-operator >=</span>fig2_data<span class=hljs-punctuation >,</span> aes<span class=hljs-punctuation >(</span>x<span class=hljs-operator >=</span>Rocket_Organisation<span class=hljs-punctuation >,</span> y<span class=hljs-operator >=</span>Success_Rate<span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    geom_col<span class=hljs-punctuation >(</span>fill<span class=hljs-operator >=</span><span class=hljs-string >&quot;#003f5c&quot;</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    ggtext<span class=hljs-operator >::</span>geom_textbox<span class=hljs-punctuation >(</span>
+        aes<span class=hljs-punctuation >(</span>label <span class=hljs-operator >=</span> paste0<span class=hljs-punctuation >(</span><span class=hljs-built_in >round</span><span class=hljs-punctuation >(</span>Success_Rate<span class=hljs-punctuation >,</span> digits <span class=hljs-operator >=</span> <span class=hljs-number >1</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;%&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        size <span class=hljs-operator >=</span> <span class=hljs-number >3</span><span class=hljs-punctuation >,</span>
+        halign <span class=hljs-operator >=</span> <span class=hljs-number >0.5</span><span class=hljs-punctuation >,</span>
+        vjust<span class=hljs-operator >=</span><span class=hljs-number >1</span><span class=hljs-punctuation >,</span>
+        box.colour <span class=hljs-operator >=</span> <span class=hljs-literal >NA</span><span class=hljs-punctuation >,</span>
+        fill <span class=hljs-operator >=</span> <span class=hljs-literal >NA</span><span class=hljs-punctuation >,</span>
+        colour <span class=hljs-operator >=</span> <span class=hljs-string >&quot;#FFFFFF&quot;</span><span class=hljs-punctuation >,</span>
+        fontface <span class=hljs-operator >=</span> <span class=hljs-string >&quot;bold&quot;</span>
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    theme_minimal<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    labs<span class=hljs-punctuation >(</span>
+        title<span class=hljs-operator >=</span><span class=hljs-string >&quot;Launch Success Rates of Major Rocket Organisations&quot;</span><span class=hljs-punctuation >,</span>
+        subtitle<span class=hljs-operator >=</span><span class=hljs-string >&quot;Success rates of launches from 1957 to 2021&quot;</span><span class=hljs-punctuation >,</span>
+        caption<span class=hljs-operator >=</span><span class=hljs-string >&quot;Data compiled by Maciej Krzysik on Kaggle&quot;</span><span class=hljs-punctuation >,</span>
+        y<span class=hljs-operator >=</span><span class=hljs-string >&quot;Launch Success Rate (%)&quot;</span><span class=hljs-punctuation >,</span>
+        x<span class=hljs-operator >=</span><span class=hljs-string >&quot;&quot;</span>
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    theme<span class=hljs-punctuation >(</span>
+        axis.text.x <span class=hljs-operator >=</span> element_text<span class=hljs-punctuation >(</span>angle <span class=hljs-operator >=</span> <span class=hljs-number >45</span><span class=hljs-punctuation >,</span> hjust <span class=hljs-operator >=</span> <span class=hljs-number >0.75</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        panel.grid.major.x <span class=hljs-operator >=</span> element_blank<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+    <span class=hljs-punctuation >)</span>
+
+fig2</code></pre>
+<div class=im-100 ><img src="/starcoffee/assets/posts/visualizing-rocket-data/code/ggplot-fig2.svg" alt=""></div>
+<h3 id=rocket_payload_and_cost_visualization ><a href="#rocket_payload_and_cost_visualization" class=header-anchor >Rocket Payload and Cost Visualization</a></h3>
+<p>Next, let&#39;s look at the relationship between each organisation&#39;s mean rocket cost and mean payload. First, we again take an initial look at the data to see what kinds of numbers we&#39;re working with:</p>
+<pre><code class="julia hljs">cost_launch_data = <span class=hljs-meta >@chain</span> launch_data <span class=hljs-keyword >begin</span>
+    <span class=hljs-meta >@group_by</span>(Rocket_Organisation)
+    <span class=hljs-meta >@summarize</span>(
+        Launches = nrow(),
+        Mean_Price = mean(skipmissing(Rocket_Price_Adjusted)),
+        Mean_Payload = mean(skipmissing(Rocket_Payload))
+    )
+    <span class=hljs-meta >@filter</span>(!isnan(Mean_Price) .&amp;&amp; !isnan(Mean_Payload))
+    <span class=hljs-meta >@arrange</span>(desc(Mean_Price))
+<span class=hljs-keyword >end</span></code></pre>
+<pre><code class="plaintext hljs">30×4 DataFrame
+ Row │ Rocket_Organisation            Launches  Mean_Price  Mean_Payload
+     │ String31                       Int64     Float64     Float64
+─────┼───────────────────────────────────────────────────────────────────
+   1 │ NASA                                204  1493.91         29072.4
+   2 │ US Air Force                        548   478.532         1598.17
+   3 │ Boeing                              138   251.491         5470.33
+   4 │ ULA                                 147   177.138        12259.1
+   5 │ Arianespace                         289   166.745        14840.9
+   6 │ Martin Marietta                     114   163.034        13109.4
+   7 │ MHI                                  84   110.977         8609.73
+   8 │ International Launch Services       137    90.2238       17207.6
+   9 │ RVSN USSR                          2452    85.7552        6179.59
+  10 │ Northrop                             88    66.4994        1741.09
+  11 │ SpaceX                              142    57.5781       21425.7
+  12 │ Lockheed                             79    55.2508        8702.08
+  13 │ JAXA                                  8    54.1623        1799.71
+  14 │ CASC                                414    49.2879        6410.89
+  15 │ ESA                                  13    43.6679        4470.67
+  16 │ Roscosmos                           344    41.1474       11567.5
+  17 │ ISRO                                 78    39.3376        3420.0
+  18 │ Kosmotras                            22    37.7113        4500.0
+  19 │ EER                                   1    35.5604        1179.0
+  20 │ Starsem                              37    33.2293        7200.54
+  21 │ VKS RF                              318    30.8519        5989.91
+  22 │ GK LS                                 1    23.0           7020.0
+  23 │ Eurockot                             13    17.3452        2150.0
+  24 │ Sandia                                1    17.1488         250.0
+  25 │ Firefly                               1    15.0           1000.0
+  26 │ Virgin Orbit                          3    12.1879         500.0
+  27 │ Rocket Lab                           23     7.85144        300.0
+  28 │ ExPace                               15     7.6303         380.0
+  29 │ Galactic Energy                       2     5.0151         350.0
+  30 │ Astra                                 4     2.55873        204.0</code></pre>
+<p>Next, we can visualize this data, and add some text annotations to this visualization:</p>
+<pre><code class="julia hljs">costs_axis = (
+    width = <span class=hljs-number >600</span>, height = <span class=hljs-number >500</span>,
+    xlabel=<span class=hljs-string >&quot;Mean Payload Mass (kg)&quot;</span>,
+    ylabel=<span class=hljs-string >&quot;Mean Price (\$USD)&quot;</span>,
+    title=<span class=hljs-string >&quot;Mean Rocket Price vs. Mean Payload Mass of Major Rocket Organisations&quot;</span>,
+    subtitle=<span class=hljs-string >&quot;Based on launches from 1957 to 2021 adjusted for 2021 inflation&quot;</span>,
+    yscale=log10,
+    xscale=log10
+)
+
+costs_payload_fig = data(cost_launch_data) *
+    mapping(:Mean_Payload, :Mean_Price =&gt; (p -&gt; p*<span class=hljs-number >1e6</span>))
+
+fig2 = draw(
+    costs_payload_fig;
+    axis=costs_axis
+)
+
+text_x = [<span class=hljs-number >29072.4</span>, <span class=hljs-number >12259.1</span>, <span class=hljs-number >1598.17</span>, <span class=hljs-number >21425.7</span>, <span class=hljs-number >204.0</span>, <span class=hljs-number >300.0</span>, <span class=hljs-number >14840.9</span>+<span class=hljs-number >8e3</span>, <span class=hljs-number >4470.67</span>]
+text_y = [<span class=hljs-number >1493.912951</span>, <span class=hljs-number >177.138444</span>, <span class=hljs-number >478.532254</span>, <span class=hljs-number >57.578071</span>, <span class=hljs-number >2.558725</span>, <span class=hljs-number >7.851438</span>, <span class=hljs-number >166.744533</span>, <span class=hljs-number >43.667909</span>] .* <span class=hljs-number >1e6</span>
+text = [<span class=hljs-string >&quot;NASA&quot;</span>, <span class=hljs-string >&quot;ULA&quot;</span>, <span class=hljs-string >&quot;US Air Force&quot;</span>, <span class=hljs-string >&quot;SpaceX&quot;</span>, <span class=hljs-string >&quot;Astra&quot;</span>, <span class=hljs-string >&quot;Rocket Lab&quot;</span>, <span class=hljs-string >&quot;Arianespace&quot;</span>, <span class=hljs-string >&quot;ESA&quot;</span>]
+
+<span class=hljs-comment ># adding all organisations</span>
+<span class=hljs-comment ># text!(</span>
+<span class=hljs-comment >#     Float64.(cost_launch_data.Mean_Payload),</span>
+<span class=hljs-comment >#     Float64.(cost_launch_data.Mean_Price);</span>
+<span class=hljs-comment >#     text=Vector{String}(cost_launch_data.Rocket_Organisation),</span>
+<span class=hljs-comment >#     align=(:center, :bottom)</span>
+<span class=hljs-comment ># )</span>
+
+text!(
+    text_x,
+    text_y;
+    text=text,
+    align=(:center, :bottom)
+)</code></pre>
+<div class=im-75 ><img src="/starcoffee/assets/posts/visualizing-rocket-data/code/costs.svg" alt=""></div>
+<p>And now for a <code>ggplot</code> version:</p>
+<pre><code class="r hljs">fig3_data <span class=hljs-operator >&lt;-</span> launch_data <span class=hljs-operator >%&gt;%</span>
+    group_by<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    summarize<span class=hljs-punctuation >(</span>
+        Launches<span class=hljs-operator >=</span>n<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        Mean_Payload<span class=hljs-operator >=</span>mean<span class=hljs-punctuation >(</span>Rocket_Payload<span class=hljs-punctuation >,</span> na.rm <span class=hljs-operator >=</span> <span class=hljs-literal >TRUE</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        Mean_Price_Adjusted<span class=hljs-operator >=</span><span class=hljs-number >1e6</span> <span class=hljs-operator >*</span> mean<span class=hljs-punctuation >(</span>Rocket_Price_Adjusted<span class=hljs-punctuation >,</span> na.rm <span class=hljs-operator >=</span> <span class=hljs-literal >TRUE</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        Mean_USD_Kg_Adjusted<span class=hljs-operator >=</span>mean<span class=hljs-punctuation >(</span>USD_Kg_Adjusted<span class=hljs-punctuation >,</span> na.rm<span class=hljs-operator >=</span><span class=hljs-literal >TRUE</span><span class=hljs-punctuation >)</span>
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
+    drop_na
+
+fig3 <span class=hljs-operator >&lt;-</span> ggplot<span class=hljs-punctuation >(</span>data<span class=hljs-operator >=</span>fig3_data<span class=hljs-punctuation >,</span> aes<span class=hljs-punctuation >(</span>x<span class=hljs-operator >=</span>Mean_Payload<span class=hljs-punctuation >,</span> y<span class=hljs-operator >=</span>Mean_Price_Adjusted<span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    geom_point<span class=hljs-punctuation >(</span>aes<span class=hljs-punctuation >(</span>color<span class=hljs-operator >=</span>Mean_USD_Kg_Adjusted<span class=hljs-punctuation >,</span> size<span class=hljs-operator >=</span>Mean_USD_Kg_Adjusted<span class=hljs-punctuation >)</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    ggrepel<span class=hljs-operator >::</span>geom_text_repel<span class=hljs-punctuation >(</span>
+        aes<span class=hljs-punctuation >(</span>label<span class=hljs-operator >=</span>Rocket_Organisation<span class=hljs-punctuation >,</span> color<span class=hljs-operator >=</span>Mean_USD_Kg_Adjusted<span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        size <span class=hljs-operator >=</span> <span class=hljs-number >2.25</span><span class=hljs-punctuation >,</span>
+        min.segment.length <span class=hljs-operator >=</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span>
+        box.padding <span class=hljs-operator >=</span> unit<span class=hljs-punctuation >(</span><span class=hljs-number >0.5</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        family<span class=hljs-operator >=</span><span class=hljs-string >&quot;JuliaMono&quot;</span>
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    scale_x_log10<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    scale_y_log10<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    scale_colour_gradientn<span class=hljs-punctuation >(</span>
+        colours<span class=hljs-operator >=</span><span class=hljs-built_in >c</span><span class=hljs-punctuation >(</span><span class=hljs-string >&quot;#003f5c&quot;</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;#ff6361&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    labs<span class=hljs-punctuation >(</span>
+        title<span class=hljs-operator >=</span><span class=hljs-string >&quot;Mean Rocket Price and Payload Mass of Rocket Organisations&quot;</span><span class=hljs-punctuation >,</span>
+        subtitle<span class=hljs-operator >=</span><span class=hljs-string >&quot;Based on data from 1957 to 2021 adjusted for inflation in 2021&quot;</span><span class=hljs-punctuation >,</span>
+        caption<span class=hljs-operator >=</span><span class=hljs-string >&quot;Data compiled by Maciej Krzysik on Kaggle&quot;</span><span class=hljs-punctuation >,</span>
+        y<span class=hljs-operator >=</span><span class=hljs-string >&quot;Mean Rocket Price ($USD)&quot;</span><span class=hljs-punctuation >,</span>
+        x<span class=hljs-operator >=</span><span class=hljs-string >&quot;Mean Payload Mass (kg)&quot;</span><span class=hljs-punctuation >,</span>
+        colour<span class=hljs-operator >=</span><span class=hljs-string >&quot;Mean $USD/kg&quot;</span>
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    theme_minimal<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    guides<span class=hljs-punctuation >(</span>
+        color<span class=hljs-operator >=</span>guide_colorbar<span class=hljs-punctuation >(</span>
+            title.position <span class=hljs-operator >=</span> <span class=hljs-string >&quot;top&quot;</span><span class=hljs-punctuation >,</span>
+            title.hjust <span class=hljs-operator >=</span> <span class=hljs-number >.5</span><span class=hljs-punctuation >,</span>
+            barwidth<span class=hljs-operator >=</span>unit<span class=hljs-punctuation >(</span><span class=hljs-number >20</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+            barheight<span class=hljs-operator >=</span>unit<span class=hljs-punctuation >(</span><span class=hljs-number >.5</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+
+        <span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        size <span class=hljs-operator >=</span> <span class=hljs-string >&quot;none&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-operator >+</span>
+    theme<span class=hljs-punctuation >(</span>
+        legend.position <span class=hljs-operator >=</span> <span class=hljs-string >&quot;top&quot;</span><span class=hljs-punctuation >,</span>
+        text <span class=hljs-operator >=</span> element_text<span class=hljs-punctuation >(</span>family <span class=hljs-operator >=</span> <span class=hljs-string >&quot;JuliaMono&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        plot.title <span class=hljs-operator >=</span> ggtext<span class=hljs-operator >::</span>element_textbox_simple<span class=hljs-punctuation >(</span>
+            margin <span class=hljs-operator >=</span> margin<span class=hljs-punctuation >(</span><span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0.5</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+            face <span class=hljs-operator >=</span> <span class=hljs-string >&quot;bold&quot;</span>
+        <span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        plot.subtitle <span class=hljs-operator >=</span> ggtext<span class=hljs-operator >::</span>element_textbox_simple<span class=hljs-punctuation >(</span>
+            size <span class=hljs-operator >=</span> rel<span class=hljs-punctuation >(</span><span class=hljs-number >0.75</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+            margin <span class=hljs-operator >=</span> margin<span class=hljs-punctuation >(</span><span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0.5</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span>
+        <span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+        plot.caption <span class=hljs-operator >=</span> ggtext<span class=hljs-operator >::</span>element_textbox_simple<span class=hljs-punctuation >(</span>
+            size <span class=hljs-operator >=</span> rel<span class=hljs-punctuation >(</span><span class=hljs-number >0.75</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+            margin <span class=hljs-operator >=</span> margin<span class=hljs-punctuation >(</span><span class=hljs-number >1</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+            halign<span class=hljs-operator >=</span><span class=hljs-number >1</span>
+        <span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
+
+    <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
+    coord_cartesian<span class=hljs-punctuation >(</span>expand<span class=hljs-operator >=</span><span class=hljs-literal >FALSE</span><span class=hljs-punctuation >,</span> clip<span class=hljs-operator >=</span><span class=hljs-string >&quot;off&quot;</span><span class=hljs-punctuation >)</span>
+
+fig3</code></pre>
+<div class=im-100 ><img src="/starcoffee/assets/posts/visualizing-rocket-data/code/ggplot-fig3.svg" alt=""></div>
+<p>Ok, I might have gotten extra with this one. But I think it&#39;s a interesting visualization, so I wanted to make sure it looked nice. The text annotation in <code>AlgebraOfGraphics.jl</code> cannot compare at all to the <code>ggrepel</code> library. It allows us to quickly make annotations that automatically space out. Whereas for the <code>AlgebraOfGraphics.jl</code>, I could not make the same annotations automatically without lots of unreadable text boxes, and had to manually add a select few annotations with adjustments.</p>
+<h2 id=conclusion ><a href="#conclusion" class=header-anchor >Conclusion</a></h2>
+<p>In summary, while <code>AlgebraOfGraphics.jl</code> does not have the same level of features and maturity as <code>ggplot2</code>, it still is a very usable data visualization library. In addition, since <code>AlgebraOfGraphics.jl</code> is built on top of <code>Makie.jl</code>, users have low-level access to the plotting backend, allowing for greater customizability compared to <code>ggplot2</code>. I am excited to see the evolution of <code>AlgebraOfGraphics.jl</code> as it matures.</p>
+<p>In regard to <code>Tidier.jl</code>, I am seriously impressed with the speed with which this library was developed, and the level of usability it already has. It was easy to pick up with my background of using the <code>tidyverse</code> for data manipulation previously, and in general it is an intuitive library to use.</p>
+<p>Thanks for reading&#33; I hope you learned a bit about using <code>AlgebraOfGraphics.jl</code> and/or <code>ggplot</code>. I hope my quick visualizations look decent enough. More posts coming soon. Until next time.</p>
+<div class=page-foot >
+    <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <a href="https://michaszj.github.io/">Michal Jagodzinski</a>. Last modified: April 24, 2023.
+    <br>Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+</div>
+</div>
+      </div>  
+    </div> 
+    
+    
+        <script src="/starcoffee/libs/highlight/highlight.min.js"></script>
+<script>hljs.highlightAll();hljs.configure({tabReplace: '    '});</script>
+
+    
+    <label for=sidebar-checkbox  class=sidebar-toggle ></label>

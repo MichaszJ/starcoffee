@@ -1,0 +1,11 @@
+10-element Vector{String}:
+ "RVSN USSR"
+ "US Air Force"
+ "CASC"
+ "Roscosmos"
+ "VKS RF"
+ "Arianespace"
+ "General Dynamics"
+ "NASA"
+ "ULA"
+ "SpaceX"
