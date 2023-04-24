@@ -387,7 +387,9 @@ text!(
 )</code></pre>
 <div class=im-75 ><img src="/starcoffee/assets/posts/visualizing-rocket-data/code/costs.svg" alt=""></div>
 <p>And now for a <code>ggplot</code> version:</p>
-<pre><code class="r hljs">fig3_data <span class=hljs-operator >&lt;-</span> launch_data <span class=hljs-operator >%&gt;%</span>
+<pre><code class="r hljs">options<span class=hljs-punctuation >(</span>repr.plot.width <span class=hljs-operator >=</span> <span class=hljs-number >8</span><span class=hljs-punctuation >,</span> repr.plot.height <span class=hljs-operator >=</span> <span class=hljs-number >5</span><span class=hljs-punctuation >,</span> repr.plot.res<span class=hljs-operator >=</span><span class=hljs-number >300</span><span class=hljs-punctuation >)</span>
+
+fig3_data <span class=hljs-operator >&lt;-</span> launch_data <span class=hljs-operator >%&gt;%</span>
     group_by<span class=hljs-punctuation >(</span>Rocket_Organisation<span class=hljs-punctuation >)</span> <span class=hljs-operator >%&gt;%</span>
     summarize<span class=hljs-punctuation >(</span>
         Launches<span class=hljs-operator >=</span>n<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
@@ -403,8 +405,7 @@ fig3 <span class=hljs-operator >&lt;-</span> ggplot<span class=hljs-punctuation 
         aes<span class=hljs-punctuation >(</span>label<span class=hljs-operator >=</span>Rocket_Organisation<span class=hljs-punctuation >,</span> color<span class=hljs-operator >=</span>Mean_USD_Kg_Adjusted<span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
         size <span class=hljs-operator >=</span> <span class=hljs-number >2.25</span><span class=hljs-punctuation >,</span>
         min.segment.length <span class=hljs-operator >=</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span>
-        box.padding <span class=hljs-operator >=</span> unit<span class=hljs-punctuation >(</span><span class=hljs-number >0.5</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
-        family<span class=hljs-operator >=</span><span class=hljs-string >&quot;JuliaMono&quot;</span>
+        box.padding <span class=hljs-operator >=</span> unit<span class=hljs-punctuation >(</span><span class=hljs-number >0.5</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span>
     <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
     scale_x_log10<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
     scale_y_log10<span class=hljs-punctuation >(</span><span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
@@ -431,7 +432,6 @@ fig3 <span class=hljs-operator >&lt;-</span> ggplot<span class=hljs-punctuation 
         size <span class=hljs-operator >=</span> <span class=hljs-string >&quot;none&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-operator >+</span>
     theme<span class=hljs-punctuation >(</span>
         legend.position <span class=hljs-operator >=</span> <span class=hljs-string >&quot;top&quot;</span><span class=hljs-punctuation >,</span>
-        text <span class=hljs-operator >=</span> element_text<span class=hljs-punctuation >(</span>family <span class=hljs-operator >=</span> <span class=hljs-string >&quot;JuliaMono&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
         plot.title <span class=hljs-operator >=</span> ggtext<span class=hljs-operator >::</span>element_textbox_simple<span class=hljs-punctuation >(</span>
             margin <span class=hljs-operator >=</span> margin<span class=hljs-punctuation >(</span><span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0.5</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
             face <span class=hljs-operator >=</span> <span class=hljs-string >&quot;bold&quot;</span>
@@ -445,7 +445,6 @@ fig3 <span class=hljs-operator >&lt;-</span> ggplot<span class=hljs-punctuation 
             margin <span class=hljs-operator >=</span> margin<span class=hljs-punctuation >(</span><span class=hljs-number >1</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-number >0</span><span class=hljs-punctuation >,</span> <span class=hljs-string >&quot;lines&quot;</span><span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
             halign<span class=hljs-operator >=</span><span class=hljs-number >1</span>
         <span class=hljs-punctuation >)</span><span class=hljs-punctuation >,</span>
-
     <span class=hljs-punctuation >)</span> <span class=hljs-operator >+</span>
     coord_cartesian<span class=hljs-punctuation >(</span>expand<span class=hljs-operator >=</span><span class=hljs-literal >FALSE</span><span class=hljs-punctuation >,</span> clip<span class=hljs-operator >=</span><span class=hljs-string >&quot;off&quot;</span><span class=hljs-punctuation >)</span>
 
