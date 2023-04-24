@@ -478,6 +478,8 @@ save("assets/posts/visualizing-rocket-data/code/costs.svg", fig2) #hide
 And now for a `ggplot` version:
 
 ```r
+options(repr.plot.width = 8, repr.plot.height = 5, repr.plot.res=300)
+
 fig3_data <- launch_data %>%
     group_by(Rocket_Organisation) %>%
     summarize(
@@ -494,8 +496,7 @@ fig3 <- ggplot(data=fig3_data, aes(x=Mean_Payload, y=Mean_Price_Adjusted)) +
         aes(label=Rocket_Organisation, color=Mean_USD_Kg_Adjusted),
         size = 2.25,
         min.segment.length = 0,
-        box.padding = unit(0.5, "lines"),
-        family="JuliaMono"
+        box.padding = unit(0.5, "lines")
     ) +
     scale_x_log10() +
     scale_y_log10() +
@@ -522,7 +523,6 @@ fig3 <- ggplot(data=fig3_data, aes(x=Mean_Payload, y=Mean_Price_Adjusted)) +
         size = "none")+
     theme(
         legend.position = "top",
-        text = element_text(family = "JuliaMono"),
         plot.title = ggtext::element_textbox_simple(
             margin = margin(0, 0, 0.5, 0, "lines"),
             face = "bold"
@@ -536,7 +536,6 @@ fig3 <- ggplot(data=fig3_data, aes(x=Mean_Payload, y=Mean_Price_Adjusted)) +
             margin = margin(1, 0, 0, 0, "lines"),
             halign=1
         ),
-
     ) +
     coord_cartesian(expand=FALSE, clip="off")
 
