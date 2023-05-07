@@ -77,8 +77,9 @@ dF = [
     <span class=hljs-number >0</span> <span class=hljs-number >0</span>
 ]
 
-ẋ<span class=hljs-number >3_</span>sim, ẏ<span class=hljs-number >3_</span>sim = [ẋ<span class=hljs-number >2</span>, ẏ<span class=hljs-number >2</span>] .- pinv(dF)*F2</code></pre> <pre><code class="plaintext hljs">UndefVarError: sol1 not defined
-</code></pre> <p>These two values are our next guesses for the required initial velocity of the projectile. These values should provide a more accurate result. However, we&#39;ll probably still need to iterate multiple times to get to a decently accurate result. Also note the use of <code>pinv&#40;&#41;</code> instead of the <code>inv&#40;&#41;</code> function. An error occurs when calculating the inverse of the <code>dF</code> matrix, I think the inverse is technically undefined for it. In any case, calculating the pseudoinverse works just fine.</p> <p>Now we can set up the loop to repeat the process above to continuously change the initial velocities to hit the target:</p> <pre><code class="julia hljs">fig2 = Figure(resolution=(<span class=hljs-number >1000</span>,<span class=hljs-number >300</span>))
+ẋ<span class=hljs-number >3_</span>sim, ẏ<span class=hljs-number >3_</span>sim = [ẋ<span class=hljs-number >2</span>, ẏ<span class=hljs-number >2</span>] .- pinv(dF)*F2</code></pre> <pre><code class="plaintext hljs">2-element Vector{Float64}:
+ 41.76455763846823
+ 26.764557638468233</code></pre> <p>These two values are our next guesses for the required initial velocity of the projectile. These values should provide a more accurate result. However, we&#39;ll probably still need to iterate multiple times to get to a decently accurate result. Also note the use of <code>pinv&#40;&#41;</code> instead of the <code>inv&#40;&#41;</code> function. An error occurs when calculating the inverse of the <code>dF</code> matrix, I think the inverse is technically undefined for it. In any case, calculating the pseudoinverse works just fine.</p> <p>Now we can set up the loop to repeat the process above to continuously change the initial velocities to hit the target:</p> <pre><code class="julia hljs">fig2 = Figure(resolution=(<span class=hljs-number >1000</span>,<span class=hljs-number >300</span>))
     ax2 = Axis(fig2[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>], xlabel=<span class=hljs-string >&quot;x (m)&quot;</span>, ylabel=<span class=hljs-string >&quot;y (m)&quot;</span>, aspect = DataAspect())
 
     scatter!(ax2, [target[<span class=hljs-number >1</span>]], [target[<span class=hljs-number >2</span>]], label=<span class=hljs-string >&quot;Target&quot;</span>)
@@ -186,8 +187,9 @@ dF2 = [
     (F22[<span class=hljs-number >2</span>] - F12[<span class=hljs-number >2</span>])/(ẋ<span class=hljs-number >2</span> - ẋ<span class=hljs-number >1</span>) (F22[<span class=hljs-number >2</span>] - F12[<span class=hljs-number >2</span>])/(ẏ<span class=hljs-number >2</span> - ẏ<span class=hljs-number >1</span>)
 ]
 
-ẋ<span class=hljs-number >3_</span>sim2, ẏ<span class=hljs-number >3_</span>sim2 = [ẋ<span class=hljs-number >2</span>, ẏ<span class=hljs-number >2</span>] .- pinv(dF2)*F22</code></pre> <pre><code class="plaintext hljs">UndefVarError: sol12 not defined
-</code></pre> <p>As can be seen, we just need to include the extra terms for the <code>dF</code> variable to make it compatible for this case. Let&#39;s now do the iteration loop:</p> <pre><code class="julia hljs">fig5 = Figure(resolution=(<span class=hljs-number >1000</span>,<span class=hljs-number >300</span>))
+ẋ<span class=hljs-number >3_</span>sim2, ẏ<span class=hljs-number >3_</span>sim2 = [ẋ<span class=hljs-number >2</span>, ẏ<span class=hljs-number >2</span>] .- pinv(dF2)*F22</code></pre> <pre><code class="plaintext hljs">2-element Vector{Float64}:
+ 41.54055444454208
+ 26.540554444542085</code></pre> <p>As can be seen, we just need to include the extra terms for the <code>dF</code> variable to make it compatible for this case. Let&#39;s now do the iteration loop:</p> <pre><code class="julia hljs">fig5 = Figure(resolution=(<span class=hljs-number >1000</span>,<span class=hljs-number >300</span>))
 ax5 = Axis(fig5[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>], xlabel=<span class=hljs-string >&quot;x (m)&quot;</span>, ylabel=<span class=hljs-string >&quot;y (m)&quot;</span>, aspect = DataAspect())
 
 scatter!(ax5, [target2[<span class=hljs-number >1</span>]], [target2[<span class=hljs-number >2</span>]], label=<span class=hljs-string >&quot;Target&quot;</span>)
