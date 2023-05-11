@@ -2,7 +2,7 @@
 @def published = "May 6th, 2023"
 @def tags = ["Programming", "Julia", "Blogging", "Optimal Control", "Numerical Methods"]
 
-@def reeval = true
+<!-- @def reeval = true -->
 
 # Direct Shooting Method with Approximated Jacobian Matrices
 
