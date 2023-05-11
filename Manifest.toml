@@ -2,7 +2,7 @@
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "c062c635f2a8c366613078e4726029459a3e87ea"
+project_hash = "157b188ae96cbdbdc3fba9c44a3a1a93afeab0e1"
 
 [[deps.AbstractAlgebra]]
 deps = ["GroupsCore", "InteractiveUtils", "LinearAlgebra", "MacroTools", "Markdown", "Random", "RandomExtensions", "SparseArrays", "Test"]
@@ -1412,6 +1412,12 @@ deps = ["AbstractTrees", "ArrayInterface", "Combinatorics", "Compat", "Construct
 git-tree-sha1 = "70cd987c6383d5cd187b2180cd655c5a30799332"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
 version = "8.51.0"
+
+[[deps.ModelingToolkitStandardLibrary]]
+deps = ["IfElse", "LinearAlgebra", "ModelingToolkit", "Symbolics"]
+git-tree-sha1 = "123c3f58f7928c73037caaaa5243de6bcc63f687"
+uuid = "16a59e39-deab-5bd0-87e4-056b12336739"
+version = "1.16.0"
 
 [[deps.MosaicViews]]
 deps = ["MappedArrays", "OffsetArrays", "PaddedViews", "StackViews"]

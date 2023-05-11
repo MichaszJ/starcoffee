@@ -1,0 +1,2 @@
+LoadError: UndefVarError: `@u_str` not defined
+in expression starting at none:2

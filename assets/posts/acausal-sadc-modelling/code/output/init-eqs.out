@@ -1,0 +1,17 @@
+\begin{equation}
+\left[
+\begin{array}{c}
+\mathrm{connect}\left( torque_{input_{+}output}, torque_{+}tau \right) \\
+\mathrm{connect}\left( torque_{+}flange, inertia_{+}flange_{a} \right) \\
+\mathrm{torque}_{input_{+}output_{+}u}\left( t \right) = torque_{input_{+}k} \\
+torque_{+}phi_{support}\left( t \right) = 0 \\
+torque_{+}flange_{+}tau\left( t \right) =  - torque_{+}tau_{+}u\left( t \right) \\
+inertia_{+}phi\left( t \right) = inertia_{+}flange_{a_{+}phi}\left( t \right) \\
+inertia_{+}phi\left( t \right) = inertia_{+}flange_{b_{+}phi}\left( t \right) \\
+\frac{\mathrm{d} inertia_{+}phi\left( t \right)}{\mathrm{d}t} = inertia_{+}w\left( t \right) \\
+\frac{\mathrm{d} inertia_{+}w\left( t \right)}{\mathrm{d}t} = inertia_{+}a\left( t \right) \\
+inertia_{+}J inertia_{+}a\left( t \right) = inertia_{+}flange_{a_{+}tau}\left( t \right) + inertia_{+}flange_{b_{+}tau}\left( t \right) \\
+\end{array}
+\right]
+\end{equation}
+

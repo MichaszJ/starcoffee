@@ -1,0 +1,5 @@
+\begin{align}
+\frac{\mathrm{d} inertia_{+}phi\left( t \right)}{\mathrm{d}t} =& inertia_{+}w\left( t \right) \\
+\frac{\mathrm{d} inertia_{+}w\left( t \right)}{\mathrm{d}t} =& inertia_{+}phiˍtt\left( t \right)
+\end{align}
+
