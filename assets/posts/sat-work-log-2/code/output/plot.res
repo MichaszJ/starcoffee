@@ -1,1 +1,1 @@
-nothing
+"/home/runner/work/starcoffee/starcoffee/__site/assets/posts/sat-work-log-2/code/output/orbit-plot.svg"

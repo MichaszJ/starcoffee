@@ -48,12 +48,18 @@ cross_entropy_loss(x_in, y_val) = -sum(y_val .* log.(Forward(xor_net, x_in)))
 preds = round.(maximum.([Forward(xor_net, convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, x)) <span class=hljs-keyword >for</span> x <span class=hljs-keyword >in</span> data]))
 passed = preds .== convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, maximum.(targets))
 
-println(<span class=hljs-string >&quot;\n<span class=hljs-subst >$(sum(passed)</span>)/4 tests passed | Accuracy <span class=hljs-subst >$(<span class=hljs-number >100</span> * sum(passed)</span> / length(targets))%&quot;</span>)</code></pre> <pre><code class="plaintext hljs">UndefVarError: `Params` not defined
+println(<span class=hljs-string >&quot;\n<span class=hljs-subst >$(sum(passed)</span>)/4 tests passed | Accuracy <span class=hljs-subst >$(<span class=hljs-number >100</span> * sum(passed)</span> / length(targets))%&quot;</span>)</code></pre> <pre><code class="plaintext hljs">Epoch 50	Pred: 0.7142	Target: 1.0	loss: 0.8478
+Epoch 100	Pred: 0.7681	Target: 1.0	loss: 0.5518
+Epoch 150	Pred: 0.8103	Target: 1.0	loss: 0.3888
+Epoch 200	Pred: 0.8428	Target: 1.0	loss: 0.2921
+Epoch 250	Pred: 0.8681	Target: 1.0	loss: 0.2302
+
+4/4 tests passed | Accuracy 100.0%
 </code></pre> <pre><code class="julia hljs">plot(
     xor_losses,
     xlabel=<span class=hljs-string >&quot;Epoch&quot;</span>, ylabel=<span class=hljs-string >&quot;Cross-Entropy Loss&quot;</span>, label=<span class=hljs-string >&quot;&quot;</span>,
     size=(<span class=hljs-number >800</span>,<span class=hljs-number >500</span>), dpi=<span class=hljs-number >300</span>
-)</code></pre> <div class=im-100 ><span style="color:red;">// Image matching '/assets/posts/simple-nn-showcase/code/xor-plot' not found. //</span></div> <h2 id=comparing_optimizers ><a href="#comparing_optimizers" class=header-anchor >Comparing Optimizers</a></h2> <p><code>simple_nn</code> has a couple of built-in optimizers. To compare them, we&#39;ll revisit the XOR problem. Defining the networks for each optimizer:</p> <pre><code class="julia hljs">optimizers = [
+)</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/simple-nn-showcase/code/output/xor-plot.svg" alt=""></div> <h2 id=comparing_optimizers ><a href="#comparing_optimizers" class=header-anchor >Comparing Optimizers</a></h2> <p><code>simple_nn</code> has a couple of built-in optimizers. To compare them, we&#39;ll revisit the XOR problem. Defining the networks for each optimizer:</p> <pre><code class="julia hljs">optimizers = [
     GradientDescentOptimizer!,
     MomentumOptimizer!,
     RMSpropOptimizer!,
@@ -94,7 +100,7 @@ loss_adam = [loss[<span class=hljs-number >4</span>] <span class=hljs-keyword >f
 plot(loss_gd, xlabel=<span class=hljs-string >&quot;Epoch&quot;</span>, ylabel=<span class=hljs-string >&quot;Cross-Entropy Loss&quot;</span>, label=<span class=hljs-string >&quot;Gradient Descent&quot;</span>, size=(<span class=hljs-number >800</span>,<span class=hljs-number >500</span>), dpi=<span class=hljs-number >300</span>)
 plot!(loss_mgd, label=<span class=hljs-string >&quot;Momentum&quot;</span>)
 plot!(loss_rms, label=<span class=hljs-string >&quot;RMSprop&quot;</span>)
-plot!(loss_adam, label=<span class=hljs-string >&quot;ADAM&quot;</span>)</code></pre> <div class=im-100 ><span style="color:red;">// Image matching '/assets/posts/simple-nn-showcase/code/opt-plot' not found. //</span></div> <h2 id=mnist ><a href="#mnist" class=header-anchor >MNIST</a></h2> <p>Importing data:</p> <pre><code class="julia hljs">train_x, train_y = MNIST(split=:train)[:]
+plot!(loss_adam, label=<span class=hljs-string >&quot;ADAM&quot;</span>)</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/simple-nn-showcase/code/output/opt-plot.svg" alt=""></div> <h2 id=mnist ><a href="#mnist" class=header-anchor >MNIST</a></h2> <p>Importing data:</p> <pre><code class="julia hljs">train_x, train_y = MNIST(split=:train)[:]
 train_x = <span class=hljs-built_in >Float32</span>.(train_x)
 
 test_x, test_y = MNIST(split=:test)[:]
@@ -156,7 +162,7 @@ cross_entropy_loss(x_in, y_val) = -sum(y_val .* log.(Forward(mnist_network, x_in
 <span class=hljs-keyword >end</span></code></pre> <pre><code class="julia hljs">p1 = plot(batch_losses, yaxis=:log, label=<span class=hljs-string >&quot;Batch Loss&quot;</span>)
 p2 = plot(validation_accuracies, label=<span class=hljs-string >&quot;Validation Accuracy&quot;</span>)
 
-plot(p1, p2, layout=(<span class=hljs-number >1</span>,<span class=hljs-number >2</span>), size=(<span class=hljs-number >800</span>,<span class=hljs-number >400</span>), dpi=<span class=hljs-number >300</span>)</code></pre> <div class=im-100 ><span style="color:red;">// Image matching '/assets/posts/simple-nn-showcase/code/mnist-plot' not found. //</span></div> <p>Classifying a small sample of images:</p> <pre><code class="julia hljs">samps = rand(<span class=hljs-number >1</span>:size(test_x, <span class=hljs-number >3</span>), <span class=hljs-number >4</span>)
+plot(p1, p2, layout=(<span class=hljs-number >1</span>,<span class=hljs-number >2</span>), size=(<span class=hljs-number >800</span>,<span class=hljs-number >400</span>), dpi=<span class=hljs-number >300</span>)</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/simple-nn-showcase/code/output/mnist-plot.svg" alt=""></div> <p>Classifying a small sample of images:</p> <pre><code class="julia hljs">samps = rand(<span class=hljs-number >1</span>:size(test_x, <span class=hljs-number >3</span>), <span class=hljs-number >4</span>)
 
 test_preds = [
     Forward(mnist_network, convert(<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Float32</span>}, flatten(test_x[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, <span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>, samp]))) <span class=hljs-keyword >for</span> samp <span class=hljs-keyword >in</span> samps

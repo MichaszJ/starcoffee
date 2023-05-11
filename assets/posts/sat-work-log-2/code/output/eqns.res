@@ -1,1 +1,14 @@
-nothing
+13-element Vector{Symbolics.Equation}:
+ r(t) ~ sqrt((x₂(t) - x₁(t))^2 + (y₂(t) - y₁(t))^2 + (z₂(t) - z₁(t))^2)
+ Differential(t)(x₁(t)) ~ ẋ₁(t)
+ Differential(t)(y₁(t)) ~ ẏ₁(t)
+ Differential(t)(z₁(t)) ~ ż₁(t)
+ Differential(t)(ẋ₁(t)) ~ (G*m₂*(x₂(t) - x₁(t))) / (r(t)^3)
+ Differential(t)(ẏ₁(t)) ~ (G*m₂*(y₂(t) - y₁(t))) / (r(t)^3)
+ Differential(t)(ż₁(t)) ~ (G*m₂*(z₂(t) - z₁(t))) / (r(t)^3)
+ Differential(t)(x₂(t)) ~ ẋ₂(t)
+ Differential(t)(y₂(t)) ~ ẏ₂(t)
+ Differential(t)(z₂(t)) ~ ż₂(t)
+ Differential(t)(ẋ₂(t)) ~ (G*m₁*(x₁(t) - x₂(t))) / (r(t)^3)
+ Differential(t)(ẏ₂(t)) ~ (G*m₁*(y₁(t) - y₂(t))) / (r(t)^3)
+ Differential(t)(ż₂(t)) ~ (G*m₁*(z₁(t) - z₂(t))) / (r(t)^3)

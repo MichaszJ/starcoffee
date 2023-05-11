@@ -1,1 +1,1 @@
-nothing
+"/home/runner/work/starcoffee/starcoffee/__site/assets/posts/simple-nn-showcase/code/output/xor-plot.svg"
