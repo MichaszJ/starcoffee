@@ -20,6 +20,10 @@ I'm currently looking for work in the aerospace and software industries in Ontar
 
 {{ blogposts Project false }}
 
-## All Posts
+## Notes
+
+- [Spacecraft Attitude Dynamics and Control](https://michaszj.github.io/starcoffee/notes/spacecraft-attitude-dynamics)
+
+## Blog Posts
 
 {{ blogposts Blogging true }}

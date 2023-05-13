@@ -2,7 +2,7 @@
 @def published = "May 10th, 2023"
 @def tags = ["Programming", "Julia", "Blogging", "Modelling", "Control Systems"]
 
-@def reeval = true
+<!-- @def reeval = true -->
 
 # Acausal Spacecraft Attitude Dynamics and Control Modelling
 
