@@ -2,7 +2,7 @@
 @def published = "May 17th, 2023"
 @def tags = ["Programming", "Julia", "Blogging", "Optimal Control", "Numerical Methods"]
 
-@def reeval = true
+<!-- @def reeval = true -->
 
 # Solving Optimal Control Problems with JuMP.jl
 

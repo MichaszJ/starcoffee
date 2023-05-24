@@ -3,7 +3,13 @@
   src: url("https://cdn.jsdelivr.net/gh/cormullion/juliamono/webfonts/JuliaMono-Regular.woff2");
 }
 
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&display=swap"); */
+
+/* @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"); */
+
+/* @import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap"); */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
 
 /* ==================================================================
     VARIABLES
@@ -12,9 +18,10 @@
 :root {
   --block-background: hsl(0, 0%, 97%);
   --output-background: hsl(0, 0%, 93%);
-  --small: 14px;
-  --normal: 19px;
-  --text-color: hsl(0, 0%, 20%);
+  --small: 13px;
+  --normal: 17px;
+  --text-color: black;
+  --highlight-colour: #0e9f6e;
 }
 
 /* ==================================================================
@@ -23,9 +30,11 @@
 
 html {
   /* font-family: "Open Sans", sans-serif !important; */
-  font-family: "Cormorant Garamond", serif !important;
+  /* font-family: "Cormorant Garamond", serif !important; */
+  /* font-family: "Atkinson Hyperlegible", sans-serif !important; */
+  font-family: "Inter", sans-serif !important;
   font-size: var(--normal);
-  color: var(--text-color);
+  color: var(--text-color) !important;
 }
 
 /* ==================================================================
@@ -95,19 +104,19 @@ html {
 }
 
 /* On wide screens, fix content width to a max value. */
-@media (min-width: 940px) {
+/* @media (min-width: 940px) {
   .franklin-content {
     width: 705px;
     margin-left: auto;
     margin-right: auto;
   }
-}
+} */
 
 /* On narrow device, reduce margins. */
 @media (max-width: 480px) {
   .franklin-content {
-    padding-left: 6%;
-    padding-right: 6%;
+    padding-left: 2%;
+    padding-right: 2%;
   }
 }
 
@@ -225,8 +234,22 @@ td {
 }
 
 .franklin-content a {
-  color: #27a573;
+  color: var(--highlight-colour);
   text-decoration: none;
+}
+
+.franklin-content a:not(.header-anchor, .tag) {
+  color: var(--text-color);
+  text-decoration: none;
+  border-bottom: 1px solid #9ca3af;
+  /* transition: color 0.15s ease-in 100ms; */
+}
+
+.franklin-content a:not(.header-anchor, .tag):hover {
+  color: var(--highlight-colour);
+  text-decoration: none;
+  border-bottom: 1px solid;
+  /* transition: color 0.15s ease-in 100ms; */
 }
 
 .franklin-content a:hover {
@@ -303,7 +326,7 @@ body {
 }
 
 .katex {
-  font-size: 1em;
+  font-size: 1.15rem;
 }
 
 .katex-display .katex {
@@ -336,7 +359,18 @@ code {
   background-color: var(--block-background) !important;
   padding: 0.1em 0.2em;
   border-radius: 2px;
-  font-size: var(--small);
+  /* font-size: var(--small); */
+  font-size: 14px;
+}
+
+pre code {
+  font-size: 14px !important;
+  background-color: white !important;
+  /* border: 2px solid !important; */
+  border-radius: 0 !important;
+  border-left: 3px solid #d1d5db;
+  /* border-left: 3px solid var(--highlight-colour); */
+  padding-left: 15px !important;
 }
 
 /* .franklin-content code { */
@@ -368,8 +402,9 @@ code {
 }
 
 .code-output {
-  background: var(--output-background) !important;
-  border: 1px dashed #dbdbdb !important;
+  /* background: var(--output-background) !important;
+  border: 1px dashed #dbdbdb !important; */
+  border: none;
 }
 
 /* ==================================================================
@@ -415,8 +450,56 @@ code {
 
 .img-caption {
   color: #808080;
-  text-align: center;
-  font-size: medium;
+  /* text-align: center; */
+  margin-top: -10px;
+  font-size: 14px;
   margin-bottom: 19px;
-  font-style: italic;
+}
+
+.title-section {
+  border-bottom: 1px solid #d1d5db;
+  margin-bottom: 2rem;
+}
+
+.post-title {
+  color: black;
+  font-size: 2.5rem;
+  /* font-weight: 700; */
+  margin-bottom: 2rem;
+}
+
+.tags-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 2rem;
+}
+
+a.tag {
+  margin: 0;
+  font-size: 12px;
+  border: 1px solid var(--highlight-colour);
+  border-radius: 5px;
+  padding: 2px;
+  font-family: "JuliaMono";
+  color: var(--highlight-colour);
+}
+
+.post-subtitle {
+  margin-bottom: 2rem;
+}
+
+.metadata {
+  color: #27a573;
+}
+
+.metadata p {
+  color: black;
+}
+
+.metadata-section {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 14px;
+  gap: 5rem;
 }

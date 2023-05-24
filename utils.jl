@@ -42,6 +42,8 @@ end
 # https://github.com/matthijscox/Blog/blob/main/utils.jl
 struct PostInfo
     title::String
+    subtitle::String
+    author::String
     pagename::String
     date::String
     tags::String
@@ -67,10 +69,32 @@ function get_post_info(post_file)
         m = match(r"@def tags = \[(.*?)\]", read_file)
         return string(first(m.captures))
     end
+
+    subtitle = open(file_path) do file
+        read_file = read(file, String)
+        m = match(r"@def subtitle = \"(.*?)\"", read_file)
+
+        if m === nothing
+            return ""
+        else
+            return string(first(m.captures))
+        end        
+    end
+
+    author = open(file_path) do file
+        read_file = read(file, String)
+        m = match(r"@def author = \"(.*?)\"", read_file)
+
+        if m === nothing
+            return ""
+        else
+            return string(first(m.captures))
+        end  
+    end
     
     pagename = first(splitext(post_file))
     
-    return PostInfo(title, pagename, date, tags)
+    return PostInfo(title, subtitle, author, pagename, date, tags)
 end
 
 function strip_tags_str(tags_str::String)
@@ -112,4 +136,32 @@ function hfun_blogposts(params)
         end
     end
     post_section *= "</ul>"
+end
+
+### creating title section with subtitle, tags, and metadata
+
+function hfun_generate_title(post_file)
+    post = get_post_info(post_file[1])
+
+    title_section = "<div class=title-section>"
+    title_section *= "<p class=post-title>$(post.title)</p>"
+
+    tags_section = "<div class=tags-section>"
+
+    tags = String.(strip_tags_str(post.tags))
+
+    for tag in tags
+        tags_section *= "<a href=/tag/$(replace(tag, " "=>"_")) class=tag>$(tag)</a>"
+    end
+
+    tags_section *= "</div>"
+    title_section *= tags_section
+    title_section *= "<p class=post-subtitle>$(post.subtitle)</p>"
+
+    title_section *= "<div class=metadata-section>"
+    title_section *= "<div class=metadata>Author<p>$(post.author)</p></div>"
+    title_section *= "<div class=metadata>Published<p>$(post.date)</p></div>"
+    title_section *= "</div>"
+
+    title_section *= "</div>"
 end
