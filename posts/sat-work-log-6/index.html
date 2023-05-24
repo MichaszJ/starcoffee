@@ -1,0 +1,93 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=preconnect  href="https://fonts.googleapis.com"> <link rel=preconnect  href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel=stylesheet > <link rel=stylesheet  href="/starcoffee/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/starcoffee/css/franklin.css"> <link rel=stylesheet  href="/starcoffee/css/poole_lanyon.css"> <link rel=stylesheet  href="/starcoffee/css/adjust.css"> <link rel=icon  href="/starcoffee/assets/favicon.png"> <title>SAT Work Log 6</title> <input type=checkbox  class=sidebar-checkbox  id=sidebar-checkbox > <div class=sidebar  id=sidebar > <div class=sidebar-item > <p>Star Coffee</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/starcoffee/">Home</a> <a class="sidebar-nav-item " href="/starcoffee/posts/welcome-to-star-coffee/">Welcome to Star Coffee</a> <a class="sidebar-nav-item " href="/starcoffee/posts/projects/">Projects</a> <a class="sidebar-nav-item " href="/starcoffee/posts/satellite-analysis-toolkit/">Satellite Analysis Toolkit</a> <a class="sidebar-nav-item " href="/starcoffee/posts/simple-nn/">Simple NN</a> </nav> <div class=sidebar-item > <p>&copy; Michal Jagodzinski.</p> </div> </div> <!-- Wrap is the content to shift when toggling the sidebar. We wrap the content to avoid any CSS collisions with our real content. --> <div class=wrap > <div class=masthead > <div class=container > <h3 class=masthead-title > <a href="/starcoffee/" title=Home >Star Coffee</a> <small>Writing about stuff, working in public</small> </h3> </div> </div> <div class="container content"> <div class=franklin-content ><div class=title-section><p class=post-title>SAT Work Log 6</p><div class=tags-section><a href=/starcoffee/tag/Julia class=tag>Julia</a><a href=/starcoffee/tag/Programming class=tag>Programming</a><a href=/starcoffee/tag/Aerospace class=tag>Aerospace</a><a href=/starcoffee/tag/Blogging class=tag>Blogging</a><a href=/starcoffee/tag/Satellite_Analysis_Toolkit class=tag>Satellite Analysis Toolkit</a><a href=/starcoffee/tag/Work_Log class=tag>Work Log</a></div><p class=post-subtitle>Updates to GroundTracker and some ModelingToolkit.jl work</p><div class=metadata-section><div class=metadata>Author<p>Michal Jagodzinski</p></div><div class=metadata>Published<p>May 24th, 2023</p></div></div></div> <div class=im-100 ><img src="https://source.unsplash.com/kJG4v63b43E" alt="" /></div> <div class=img-caption >Photo by <a href="https://unsplash.com/photos/kJG4v63b43E">Hunter Reilly</a></div> <p>Hello and welcome back to Star Coffee. I haven&#39;t made many updates on SAT for a while now. I&#39;ve been focusing on some other stuff plus my &#40;lack of&#41; mental health really makes it hard to be motivated to work. But I got back into active development on SAT a bit ago so here are some updates.</p> <h1 id=improvements_to_groundtracker ><a href="#improvements_to_groundtracker" class=header-anchor >Improvements to GroundTracker</a></h1> <div class=im-100 ><img src="/starcoffee/assets/posts/sat-work-log-6/code/groundtracker.png" alt=""></div> <p>A recent version of <code>GLMakie</code> brought a fix to a bug that&#39;s been incredibly annoying for me. The bug causes the text of interactive textboxes to appear in the bottom left corner of the screen. This is no longer the case, and the textbox text appears where it should. I have now implemented textboxes to edit the orbital elements of the satellites, giving much more precise control over the previously used sliders. I intended to use textboxes from the start, however due to the mentioned bug, I had to resort to using sliders to actually achieve the interactivity I wanted.</p> <p>I have also gotten the functionality to switch between satellites working properly as well. The user is now able to switch which satellite&#39;s orbital elements are displayed in the UI and edit them.</p> <p>Next I implemented a better system for managing the colours of individual satellites&#39; data. Previously, after I implemented ground station visibility analysis, every satellite had the default <code>viridis</code> colour palette applied to it. Now, using <code>ColorSchemes.jl</code>, custom color schemes can be assigned for each satellite. The colour schemes are defined using the following <code>Dict</code>:</p> <pre><code class="julia hljs">colormaps = <span class=hljs-built_in >Dict</span>(
+    <span class=hljs-string >&quot;Sat 1&quot;</span> =&gt; cgrad(ColorScheme([
+        <span class=hljs-string >colorant&quot;#7E1717&quot;</span>, <span class=hljs-string >colorant&quot;#068DA9&quot;</span>, <span class=hljs-string >colorant&quot;#E55807&quot;</span>
+    ]), <span class=hljs-number >3</span>, categorical=<span class=hljs-literal >true</span>),
+
+    <span class=hljs-string >&quot;Sat 2&quot;</span> =&gt; cgrad(ColorScheme([
+        <span class=hljs-string >colorant&quot;#146C94&quot;</span>, <span class=hljs-string >colorant&quot;#AFD3E2&quot;</span>, <span class=hljs-string >colorant&quot;#19A7CE&quot;</span>
+    ]), <span class=hljs-number >3</span>, categorical=<span class=hljs-literal >true</span>)
+)</code></pre> <p>The first colour corresponds to the satellite out of view for visibility analysis, the second is the default colour used when visibility analysis is disabled, and the third colour is the colour when the satellite is in view. I&#39;ve also added a nice section to the UI to show all the satellites and their individual colours.</p> <p>Here are some of the next things I&#39;ll be working on with GroundTracker:</p> <ul> <li><p>Implementing <code>DataInspector</code>s for the orbit and ground track plots to provide useful information for users</p> <li><p>Improve the algorithms for generating the orbits and ground tracks</p> <li><p>Create more tools for visibility analysis, possibly a separate dashboard that generates plots/analyses related to visibility analysis</p> <li><p>Create tools related to thermal analysis, such as eclipse determination</p> </ul> <p>I&#39;m also planning to read up on satellite operations-related topics to see what other potential functionality I can add that may be useful.</p> <h1 id=implementing_attitude_dynamics_modelingtoolkitjl_components ><a href="#implementing_attitude_dynamics_modelingtoolkitjl_components" class=header-anchor >Implementing Attitude Dynamics ModelingToolkit.jl Components</a></h1> <p>If you&#39;ve been keeping up with the blog, I&#39;ve recently published two posts on using <code>ModelingToolkit.jl</code> for spacecraft attitude dynamics and control. The <a href="https://michaszj.github.io/starcoffee/posts/acausal-sadc-modelling/">first on the linearized form of Euler&#39;s equations</a> and the <a href="https://michaszj.github.io/starcoffee/posts/nonlinear-sadc-modelling/">second on the nonlinear form</a>. I rewrote the linear attitude component, getting rid of the extra <code>Flange</code> and other unnecessary components for it to be equivalent to the nonlinear one.</p> <pre><code class="julia hljs"><span class=hljs-meta >@component</span> <span class=hljs-keyword >function</span> LinearSpacecraftAttitude(
+    ; name, Jx=<span class=hljs-number >100.0</span>, Jy=<span class=hljs-number >100.0</span>, Jz=<span class=hljs-number >40.0</span>, u0=zeros(<span class=hljs-number >3</span>), ω<span class=hljs-number >0</span>=zeros(<span class=hljs-number >3</span>), ω̇<span class=hljs-number >0</span>=zeros(<span class=hljs-number >3</span>)
+)
+    <span class=hljs-meta >@named</span> Mx = B.RealInput()
+    <span class=hljs-meta >@named</span> My = B.RealInput()
+    <span class=hljs-meta >@named</span> Mz = B.RealInput()
+
+    <span class=hljs-meta >@named</span> phi_x = B.RealOutput()
+    <span class=hljs-meta >@named</span> phi_y = B.RealOutput()
+    <span class=hljs-meta >@named</span> phi_z = B.RealOutput()
+
+    <span class=hljs-meta >@variables</span> ϕ(t)=u0[<span class=hljs-number >1</span>] θ(t)=u0[<span class=hljs-number >2</span>] ψ(t)=u0[<span class=hljs-number >3</span>]
+    <span class=hljs-meta >@variables</span> ωx(t)=ω<span class=hljs-number >0</span>[<span class=hljs-number >1</span>] ωy(t)=ω<span class=hljs-number >0</span>[<span class=hljs-number >2</span>] ωz(t)=ω<span class=hljs-number >0</span>[<span class=hljs-number >3</span>]
+    <span class=hljs-meta >@variables</span> ω̇x(t)=ω̇<span class=hljs-number >0</span>[<span class=hljs-number >1</span>] ω̇y(t)=ω̇<span class=hljs-number >0</span>[<span class=hljs-number >2</span>] ω̇z(t)=ω̇<span class=hljs-number >0</span>[<span class=hljs-number >3</span>]
+
+    sts=[ϕ, θ, ψ, ωx, ωy, ωz, ω̇x, ω̇y, ω̇z]
+
+    ps = <span class=hljs-meta >@parameters</span> Jx=Jx Jy=Jy Jz=Jz u0=u0 ω<span class=hljs-number >0</span>=ω<span class=hljs-number >0</span> ω̇<span class=hljs-number >0</span>=ω̇<span class=hljs-number >0</span>
+
+    D = Differential(t)
+
+    eqs = [
+        phi_x.u ~ ϕ,
+        phi_y.u ~ θ,
+        phi_z.u ~ ψ,
+
+        D(ϕ) ~ ωx + ωz * tan(θ)*cos(ϕ) + ωy*tan(θ)*sin(ϕ),
+        D(θ) ~ ωy*cos(ϕ) - ωz*sin(ϕ),
+        D(ψ) ~ ωz*sec(θ)*cos(ϕ) + ωy*sec(θ)*sin(ϕ),
+
+        D(ωx) ~ ω̇x,
+        D(ωy) ~ ω̇y,
+        D(ωz) ~ ω̇z,
+
+        Mx.u ~ Jx * ω̇x,
+        My.u ~ Jy * ω̇y,
+        Mz.u ~ Jz * ω̇z
+    ]
+
+    compose(
+        ODESystem(eqs, t, sts, ps; name = name), Mx, My, Mz, phi_x, phi_y, phi_z
+    )
+<span class=hljs-keyword >end</span></code></pre> <pre><code class="julia hljs"><span class=hljs-meta >@component</span> <span class=hljs-keyword >function</span> SpacecraftAttitude(
+    ; name, Jx=<span class=hljs-number >100.0</span>, Jy=<span class=hljs-number >100.0</span>, Jz=<span class=hljs-number >40.0</span>, u0=zeros(<span class=hljs-number >3</span>), ω<span class=hljs-number >0</span>=zeros(<span class=hljs-number >3</span>), ω̇<span class=hljs-number >0</span>=zeros(<span class=hljs-number >3</span>)
+)
+    <span class=hljs-meta >@named</span> Mx = B.RealInput()
+    <span class=hljs-meta >@named</span> My = B.RealInput()
+    <span class=hljs-meta >@named</span> Mz = B.RealInput()
+
+    <span class=hljs-meta >@named</span> phi_x = B.RealOutput()
+    <span class=hljs-meta >@named</span> phi_y = B.RealOutput()
+    <span class=hljs-meta >@named</span> phi_z = B.RealOutput()
+
+    <span class=hljs-meta >@variables</span> ϕ(t)=u0[<span class=hljs-number >1</span>] θ(t)=u0[<span class=hljs-number >2</span>] ψ(t)=u0[<span class=hljs-number >3</span>]
+    <span class=hljs-meta >@variables</span> ωx(t)=ω<span class=hljs-number >0</span>[<span class=hljs-number >1</span>] ωy(t)=ω<span class=hljs-number >0</span>[<span class=hljs-number >2</span>] ωz(t)=ω<span class=hljs-number >0</span>[<span class=hljs-number >3</span>]
+    <span class=hljs-meta >@variables</span> ω̇x(t)=ω̇<span class=hljs-number >0</span>[<span class=hljs-number >1</span>] ω̇y(t)=ω̇<span class=hljs-number >0</span>[<span class=hljs-number >2</span>] ω̇z(t)=ω̇<span class=hljs-number >0</span>[<span class=hljs-number >3</span>]
+
+    sts=[ϕ, θ, ψ, ωx, ωy, ωz, ω̇x, ω̇y, ω̇z]
+
+    ps = <span class=hljs-meta >@parameters</span> Jx=Jx Jy=Jy Jz=Jz u0=u0 ω<span class=hljs-number >0</span>=ω<span class=hljs-number >0</span> ω̇<span class=hljs-number >0</span>=ω̇<span class=hljs-number >0</span>
+
+    D = Differential(t)
+
+    eqs = [
+        phi_x.u ~ ϕ,
+        phi_y.u ~ θ,
+        phi_z.u ~ ψ,
+
+        D(ϕ) ~ ωx + ωz * tan(θ)*cos(ϕ) + ωy*tan(θ)*sin(ϕ),
+        D(θ) ~ ωy*cos(ϕ) - ωz*sin(ϕ),
+        D(ψ) ~ ωz*sec(θ)*cos(ϕ) + ωy*sec(θ)*sin(ϕ),
+
+        D(ωx) ~ ω̇x,
+        D(ωy) ~ ω̇y,
+        D(ωz) ~ ω̇z,
+
+        Mx.u ~ Jx * ω̇x - (Jy - Jz)*ωy*ωz,
+        My.u ~ Jy * ω̇y - (Jz - Jx)*ωz*ωx,
+        Mz.u ~ Jz * ω̇z - (Jx - Jy)*ωx*ωy
+    ]
+
+    compose(
+        ODESystem(eqs, t, sts, ps; name = name), Mx, My, Mz, phi_x, phi_y, phi_z
+    )
+<span class=hljs-keyword >end</span></code></pre> <p>I&#39;m planning to formalize these components more by including proper metadata and possibly integrating <code>Unitful.jl</code> units, however I have been getting some annoying errors lately using units. In time, I also want to separate the attitude representation of the spacecraft from the dynamics, currently they are both integrated in the <code>SpacecraftAttitude</code> components. Instead, I&#39;d like to have some sort of arbitrary attitude component that is able to interface with a general dynamics component, so different attitude representations can be replaced easily in simulations.</p> <p>I&#39;m planning on adding some spacecraft environment disturbance components as well, such as gravity-gradient, aerodynamic, magnetic, etc. This would allow for more realistic simulations, however these components would also depend on the orbital dynamics of the spacecraft, so I would need to create components to model that as well.</p> <h1 id=wrapping_up ><a href="#wrapping_up" class=header-anchor >Wrapping Up</a></h1> <p>Thanks for reading. This has been a short post as I am still focusing on other stuff like finding employment. I am planning to keep working on SAT as well as learning more GNC-related topics so expect more posts soon. Until next time.</p> <div class=page-foot > <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <a href="https://michaszj.github.io/">Michal Jagodzinski</a>. Last modified: May 24, 2023. <br>Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>. </div> </div> </div> </div> <script src="/starcoffee/libs/highlight/highlight.min.js"></script> <script>hljs.highlightAll();hljs.configure({tabReplace: ' '});</script> <label for=sidebar-checkbox  class=sidebar-toggle ></label>
