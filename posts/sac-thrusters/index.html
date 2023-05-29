@@ -1,0 +1,291 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=preconnect  href="https://fonts.googleapis.com"> <link rel=preconnect  href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel=stylesheet > <link rel=stylesheet  href="/starcoffee/libs/katex/katex.min.css"> <link rel=stylesheet  href="/starcoffee/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/starcoffee/css/franklin.css"> <link rel=stylesheet  href="/starcoffee/css/poole_lanyon.css"> <link rel=stylesheet  href="/starcoffee/css/adjust.css"> <link rel=icon  href="/starcoffee/assets/favicon.png"> <title>Modelling Spacecraft Attitude Control with Thrusters</title> <input type=checkbox  class=sidebar-checkbox  id=sidebar-checkbox > <div class=sidebar  id=sidebar > <div class=sidebar-item > <p>Star Coffee</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/starcoffee/">Home</a> <a class="sidebar-nav-item " href="/starcoffee/posts/welcome-to-star-coffee/">Welcome to Star Coffee</a> <a class="sidebar-nav-item " href="/starcoffee/posts/projects/">Projects</a> <a class="sidebar-nav-item " href="/starcoffee/posts/satellite-analysis-toolkit/">Satellite Analysis Toolkit</a> <a class="sidebar-nav-item " href="/starcoffee/posts/simple-nn/">Simple NN</a> </nav> <div class=sidebar-item > <p>&copy; Michal Jagodzinski.</p> </div> </div> <!-- Wrap is the content to shift when toggling the sidebar. We wrap the content to avoid any CSS collisions with our real content. --> <div class=wrap > <div class=masthead > <div class=container > <h3 class=masthead-title > <a href="/starcoffee/" title=Home >Star Coffee</a> <small>Writing about stuff, working in public</small> </h3> </div> </div> <div class="container content"> <div class=franklin-content ><div class=title-section><p class=post-title>Modelling Spacecraft Attitude Control with Thrusters</p><div class=tags-section><a href=/starcoffee/tag/Blogging class=tag>Blogging</a><a href=/starcoffee/tag/Julia class=tag>Julia</a><a href=/starcoffee/tag/Programming class=tag>Programming</a><a href=/starcoffee/tag/Aerospace class=tag>Aerospace</a><a href=/starcoffee/tag/Control_Systems class=tag>Control Systems</a></div><p class=post-subtitle>Simulating active spacecraft attitude control using thrusters</p><div class=metadata-section><div class=metadata>Author<p>Michal Jagodzinski</p></div><div class=metadata>Published<p>May 29th, 2023</p></div></div></div> <div class=im-100 ><img src="https://source.unsplash.com/PPoWdNggYu8" alt="" /></div> <div class=img-caption >Photo by <a href="https://unsplash.com/photos/PPoWdNggYu8">Marek Piwnicki</a></div> <p>Hello and welcome back to Star Coffee. We continue developing our spacecraft attitude dynamics and control simulations, this time by implementing attitude control using thrusters.</p> <div class=franklin-toc ><ol><li><a href="#introduction_to_attitude_control_with_thrusters">Introduction to Attitude Control with Thrusters</a><li><a href="#implementing_thruster_controllers_with_modelingtoolkitjl">Implementing Thruster Controllers with ModelingToolkit.jl</a><ol><li><a href="#bang-bang_controller">Bang-Bang Controller</a><li><a href="#bang-bang_with_deadzone_controller">Bang-Bang with Deadzone Controller</a><li><a href="#schmitt_trigger">Schmitt Trigger</a><li><a href="#pseudorate_modulator">Pseudorate Modulator</a><li><a href="#pwpf_modulator">PWPF Modulator</a><li><a href="#controller_comparison">Controller Comparison</a></ol><li><a href="#wrapping_up">Wrapping Up</a><li><a href="#footnotes_and_references">Footnotes and References</a></ol></div> <h1 id=introduction_to_attitude_control_with_thrusters ><a href="#introduction_to_attitude_control_with_thrusters" class=header-anchor >Introduction to Attitude Control with Thrusters</a></h1> <p>The challenge of using thrusters for attitude control is the fact that the thrust they produce is not able to be throttled. In other words, the torque is on or off, 100&#37; or 0&#37;. Proportional thrusters do exist but are not typically used<sup id="fnref:1"><a href="#fndef:1" class=fnref >[1]</a></sup>.</p> <p>In my previous posts related to spacecraft attitude control, we have been simulating the responses of spacecraft to continuous torque values. If we want to simulate using thrusters, we have to implement some new controllers that have an either on or off torque output to the spacecraft.</p> <p>The most simple controller we can use for controlling thrusters is the <a href="https://en.wikipedia.org/wiki/Bang&#37;E2&#37;80&#37;93bang_control">bang-bang controller</a>. The control law is defined as:</p> <span class=katex-display ><span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML" display=block ><semantics><mrow><mi>u</mi><mo stretchy=false >(</mo><mi>t</mi><mo stretchy=false >)</mo><mo>=</mo><mrow><mo fence=true >{</mo><mtable rowspacing=0.36em  columnalign="left left" columnspacing=1em ><mtr><mtd><mstyle scriptlevel=0  displaystyle=false ><mrow><mi>U</mi><mtext>sign</mtext><mo stretchy=false >(</mo><mi>r</mi><mo stretchy=false >(</mo><mi>t</mi><mo stretchy=false >)</mo><mo stretchy=false >)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel=0  displaystyle=false ><mrow><mi mathvariant=normal >∣</mi><mi>r</mi><mo stretchy=false >(</mo><mi>t</mi><mo stretchy=false >)</mo><mi mathvariant=normal >∣</mi><mo>&gt;</mo><mn>0</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel=0  displaystyle=false ><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel=0  displaystyle=false ><mrow><mi>r</mi><mo stretchy=false >(</mo><mi>t</mi><mo stretchy=false >)</mo><mo>=</mo><mn>0</mn></mrow></mstyle></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex"> u(t) = \begin{cases} U \text{sign} (r(t)) &amp; |r(t)| &gt; 0 \\ 0 &amp; r(t) = 0 \end{cases} </annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">u</span><span class=mopen >(</span><span class="mord mathnormal">t</span><span class=mclose >)</span><span class=mspace  style="margin-right:0.2778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2778em;"></span></span><span class=base ><span class=strut  style="height:3em;vertical-align:-1.25em;"></span><span class=minner ><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size4">{</span></span><span class=mord ><span class=mtable ><span class=col-align-l ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.69em;"><span style="top:-3.69em;"><span class=pstrut  style="height:3.008em;"></span><span class=mord ><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord text"><span class=mord >sign</span></span><span class=mopen >(</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class=mopen >(</span><span class="mord mathnormal">t</span><span class=mclose >))</span></span></span><span style="top:-2.25em;"><span class=pstrut  style="height:3.008em;"></span><span class=mord ><span class=mord >0</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:1.19em;"><span></span></span></span></span></span><span class=arraycolsep  style="width:1em;"></span><span class=col-align-l ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.69em;"><span style="top:-3.69em;"><span class=pstrut  style="height:3.008em;"></span><span class=mord ><span class=mord >∣</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class=mopen >(</span><span class="mord mathnormal">t</span><span class=mclose >)</span><span class=mord >∣</span><span class=mspace  style="margin-right:0.2778em;"></span><span class=mrel >&gt;</span><span class=mspace  style="margin-right:0.2778em;"></span><span class=mord >0</span></span></span><span style="top:-2.25em;"><span class=pstrut  style="height:3.008em;"></span><span class=mord ><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class=mopen >(</span><span class="mord mathnormal">t</span><span class=mclose >)</span><span class=mspace  style="margin-right:0.2778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2778em;"></span><span class=mord >0</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:1.19em;"><span></span></span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span> <p>Where <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> is the controller output, <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span></span></span></span> is the thruster&#39;s torque, and <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span></span></span></span> is a reference signal, which is the output of another controller such as a PID controller. This control law is quite intuitive, if the error is greater than zero, the thruster&#40;s&#41; activate to correct the error. This control law is quite crude and leads to poor performance.</p> <p>A slightly better control law is the bang-bang controller with a deadzone:</p> <span class=katex-display ><span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML" display=block ><semantics><mrow><mi>u</mi><mo stretchy=false >(</mo><mi>t</mi><mo stretchy=false >)</mo><mo>=</mo><mrow><mo fence=true >{</mo><mtable rowspacing=0.36em  columnalign="left left" columnspacing=1em ><mtr><mtd><mstyle scriptlevel=0  displaystyle=false ><mrow><mi>U</mi><mtext>sign</mtext><mo stretchy=false >(</mo><mi>r</mi><mo stretchy=false >(</mo><mi>t</mi><mo stretchy=false >)</mo><mo stretchy=false >)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel=0  displaystyle=false ><mrow><mi mathvariant=normal >∣</mi><mi>r</mi><mo stretchy=false >(</mo><mi>t</mi><mo stretchy=false >)</mo><mi mathvariant=normal >∣</mi><mo>≥</mo><mi>α</mi></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel=0  displaystyle=false ><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel=0  displaystyle=false ><mrow><mi mathvariant=normal >∣</mi><mi>r</mi><mo stretchy=false >(</mo><mi>t</mi><mo stretchy=false >)</mo><mi mathvariant=normal >∣</mi><mo>&lt;</mo><mi>α</mi></mrow></mstyle></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex"> u(t) = \begin{cases} U \text{sign} (r(t)) &amp; |r(t)| \geq \alpha \\ 0 &amp; |r(t)| &lt; \alpha \end{cases} </annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">u</span><span class=mopen >(</span><span class="mord mathnormal">t</span><span class=mclose >)</span><span class=mspace  style="margin-right:0.2778em;"></span><span class=mrel >=</span><span class=mspace  style="margin-right:0.2778em;"></span></span><span class=base ><span class=strut  style="height:3em;vertical-align:-1.25em;"></span><span class=minner ><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size4">{</span></span><span class=mord ><span class=mtable ><span class=col-align-l ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.69em;"><span style="top:-3.69em;"><span class=pstrut  style="height:3.008em;"></span><span class=mord ><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord text"><span class=mord >sign</span></span><span class=mopen >(</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class=mopen >(</span><span class="mord mathnormal">t</span><span class=mclose >))</span></span></span><span style="top:-2.25em;"><span class=pstrut  style="height:3.008em;"></span><span class=mord ><span class=mord >0</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:1.19em;"><span></span></span></span></span></span><span class=arraycolsep  style="width:1em;"></span><span class=col-align-l ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.69em;"><span style="top:-3.69em;"><span class=pstrut  style="height:3.008em;"></span><span class=mord ><span class=mord >∣</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class=mopen >(</span><span class="mord mathnormal">t</span><span class=mclose >)</span><span class=mord >∣</span><span class=mspace  style="margin-right:0.2778em;"></span><span class=mrel >≥</span><span class=mspace  style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span><span style="top:-2.25em;"><span class=pstrut  style="height:3.008em;"></span><span class=mord ><span class=mord >∣</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class=mopen >(</span><span class="mord mathnormal">t</span><span class=mclose >)</span><span class=mord >∣</span><span class=mspace  style="margin-right:0.2778em;"></span><span class=mrel >&lt;</span><span class=mspace  style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:1.19em;"><span></span></span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span> <p>This controller is quite similar except it has a deadzone of width <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>α</mi></mrow><annotation encoding="application/x-tex">2\alpha</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.6444em;"></span><span class=mord >2</span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span>, where it does not fire.</p> <p>Next we have the <a href="https://en.wikipedia.org/wiki/Schmitt_trigger">Schmitt trigger</a>, similar to the bang-bang controller with deadzone. In this case this control law is defined with a block diagram:</p> <div class=im-75 ><img src="/starcoffee/assets/posts/sac-thrusters/code/schmitt-trigger.svg" alt=""></div> <p>This control law functions by activating when the reference signal reaches a trigger threshold, <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>U</mi><mtext>on</mtext></msub></mrow><annotation encoding="application/x-tex">U_\text{on}</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.8333em;vertical-align:-0.15em;"></span><span class=mord ><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">on</span></span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, and deactivates once it reaches an off threshold, <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>U</mi><mtext>off</mtext></msub></mrow><annotation encoding="application/x-tex">U_\text{off}</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.8333em;vertical-align:-0.15em;"></span><span class=mord ><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">off</span></span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>. The Schmitt trigger is a very useful, and it will be a core part of the next two control laws we will be looking at.</p> <p>The next controllers we will be looking at are a class of controllers called pulse modulators. First we have the pseudorate modulator or derived-rate modulator:</p> <div class=im-75 ><img src="/starcoffee/assets/posts/sac-thrusters/code/prm.svg" alt=""></div> <p>As can be seen, this controller builds upon the Schmitt trigger and adds in a first-order filter with time constant <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>m</mi></msub></mrow><annotation encoding="application/x-tex">T_m</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.8333em;vertical-align:-0.15em;"></span><span class=mord ><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> and filter gain <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>K</mi><mi>m</mi></msub></mrow><annotation encoding="application/x-tex">K_m</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.8333em;vertical-align:-0.15em;"></span><span class=mord ><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>.</p> <p>The next controller, the pulse-width pulse-frequency modulator is very similar to the pseudorate modulator<sup id="fnref:2"><a href="#fndef:2" class=fnref >[2]</a></sup> :</p> <div class=im-75 ><img src="/starcoffee/assets/posts/sac-thrusters/code/pwpf.svg" alt=""></div> <h1 id=implementing_thruster_controllers_with_modelingtoolkitjl ><a href="#implementing_thruster_controllers_with_modelingtoolkitjl" class=header-anchor >Implementing Thruster Controllers with ModelingToolkit.jl</a></h1> <p>Alright, let&#39;s implement these controllers with <code>ModelingToolkit.jl</code>. For simplicity, we will only be implementing these controllers along one axis of a spacecraft.</p> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> CairoMakie, AlgebraOfGraphics
+<span class=hljs-keyword >using</span> ModelingToolkit, ModelingToolkitStandardLibrary
+<span class=hljs-keyword >using</span> DifferentialEquations
+set_aog_theme!()
+
+<span class=hljs-meta >@parameters</span> t
+<span class=hljs-keyword >const</span> B = ModelingToolkitStandardLibrary.Blocks</code></pre> <p>Let&#39;s create simple components to model a thruster and the spacecraft:</p> <pre><code class="julia hljs"><span class=hljs-meta >@component</span> <span class=hljs-keyword >function</span> Thruster(; name, thrust, lever_arm)
+    <span class=hljs-meta >@named</span> ctrl_input = B.RealInput()
+    <span class=hljs-meta >@named</span> torque_out = B.RealOutput()
+
+    sts = <span class=hljs-meta >@variables</span> u(t) M(t)
+    ps = <span class=hljs-meta >@parameters</span> thrust=thrust lever_arm=lever_arm
+
+    eqs = [
+        M ~ u * lever_arm * thrust,
+
+        u ~ ctrl_input.u,
+        torque_out.u ~ M
+    ]
+
+    ODESystem(eqs, t, sts, ps; systems=[ctrl_input, torque_out], name = name)
+<span class=hljs-keyword >end</span>
+
+<span class=hljs-meta >@component</span> <span class=hljs-keyword >function</span> SimpleSpacecraftPlant(; name, J=<span class=hljs-number >100.0</span>, ϕ<span class=hljs-number >0</span>=<span class=hljs-number >0.0</span>, ω<span class=hljs-number >0</span>=<span class=hljs-number >0.0</span>)
+    <span class=hljs-meta >@named</span> torque_in = B.RealInput()
+
+    <span class=hljs-meta >@named</span> ϕ_out = B.RealOutput()
+    <span class=hljs-meta >@named</span> ω_out = B.RealOutput()
+
+    sts = <span class=hljs-meta >@variables</span> ϕ(t)=ϕ<span class=hljs-number >0</span> ω(t)=ω<span class=hljs-number >0</span>
+    ps = <span class=hljs-meta >@parameters</span> J=J ϕ<span class=hljs-number >0</span>=ϕ<span class=hljs-number >0</span> ω<span class=hljs-number >0</span>=ω<span class=hljs-number >0</span>
+
+    D = Differential(t)
+
+    eqs = [
+        D(ϕ) ~ ω,
+        D(ω) ~ torque_in.u / J,
+
+        ϕ_out.u ~ ϕ,
+        ω_out.u ~ ω
+    ]
+
+    compose(
+        ODESystem(eqs, t, sts, ps; name = name), torque_in, ϕ_out, ω_out
+    )
+<span class=hljs-keyword >end</span></code></pre> <h2 id=bang-bang_controller ><a href="#bang-bang_controller" class=header-anchor >Bang-Bang Controller</a></h2> <p>Let&#39;s start by simulating the basic bang-bang controller. First we create the component for the controller:</p> <pre><code class="julia hljs"><span class=hljs-meta >@component</span> <span class=hljs-keyword >function</span> BBController(; name, thruster_torque)
+    <span class=hljs-meta >@named</span> ref_signal = B.RealInput()
+    <span class=hljs-meta >@named</span> ctrl_output = B.RealOutput()
+
+    sts = <span class=hljs-meta >@variables</span> ref(t) u(t)
+    ps = <span class=hljs-meta >@parameters</span> thruster_torque=thruster_torque
+
+    eqs = [
+        u ~ thruster_torque*sign(ref),
+
+        ref ~ ref_signal.u,
+        ctrl_output.u ~ u
+    ]
+
+    compose(
+        ODESystem(eqs, t, sts, ps; name = name), ref_signal, ctrl_output
+    )
+<span class=hljs-keyword >end</span></code></pre> <p>Next let&#39;s set up the simulation. For the reference signal, we&#39;ll obtain it by using the <code>LimPID</code> block from the MTK standard library:</p> <pre><code class="julia hljs">setpoint = deg2rad(<span class=hljs-number >10</span>)
+<span class=hljs-meta >@named</span> θ_ref = B.Constant(k=setpoint)
+
+J = <span class=hljs-number >100</span>
+ωn = <span class=hljs-number >0.5</span>
+ζ = <span class=hljs-number >1.3</span>
+
+Kp = J*ωn^<span class=hljs-number >2</span>
+Kd = <span class=hljs-number >2</span>*J*ωn*ζ
+
+<span class=hljs-meta >@named</span> ref_controller = B.LimPID(k=Kp, Td=Kd, Ti=<span class=hljs-number >1</span>, gains=<span class=hljs-literal >true</span>)
+
+F = <span class=hljs-number >1</span>
+L = <span class=hljs-number >1</span>
+<span class=hljs-meta >@named</span> thruster = Thruster(thrust=F, lever_arm=L)
+
+<span class=hljs-meta >@named</span> plant = SimpleSpacecraftPlant(J=J)
+
+F = <span class=hljs-number >1</span>
+L = <span class=hljs-number >1</span>
+<span class=hljs-meta >@named</span> bangbang_controller = BBController(thruster_torque=L*F)</code></pre> <p>Next I&#39;ll define a helper function to run the simulation with different controllers:</p> <pre><code class="julia hljs"><span class=hljs-keyword >function</span> simulate_system(controller; tspan=[<span class=hljs-number >0.0</span>, <span class=hljs-number >120.0</span>], solver_kwargs...)
+    system_eqs = [
+        connect(θ_ref.output, ref_controller.reference),
+        connect(ref_controller.ctr_output, controller.ref_signal),
+        connect(controller.ctrl_output, thruster.ctrl_input),
+        connect(thruster.torque_out, plant.torque_in),
+        connect(plant.ϕ_out, ref_controller.measurement),
+    ]
+
+    <span class=hljs-meta >@named</span> model = ODESystem(
+        system_eqs, t; systems = [
+            θ_ref, ref_controller, thruster, plant, controller
+        ]
+    )
+    sys = structural_simplify(model)
+
+    prob = ODEProblem(sys, [], tspan, [])
+    sol = solve(prob; solver_kwargs...)
+<span class=hljs-keyword >end</span></code></pre> <p>This function just takes care of composing the system and running the simulation automatically, and returns the solution object. The block diagram for this system is:</p> <div class=im-100 ><img src="/starcoffee/assets/posts/sac-thrusters/code/sys-diagram.svg" alt=""></div> <p>Let&#39;s simulate the system with a bang-bang controller and plot the results:</p> <pre><code class="julia hljs">tspan=[<span class=hljs-number >0.0</span>, <span class=hljs-number >180.0</span>]
+
+bb_sol = simulate_system(bangbang_controller; tspan=tspan)
+
+times = <span class=hljs-number >0</span>:<span class=hljs-number >0.1</span>:tspan[<span class=hljs-number >2</span>]
+interp = bb_sol(times)
+
+fig1 = Figure()
+ax11 = Axis(fig1[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>], xlabel=<span class=hljs-string >&quot;Time (s)&quot;</span>, ylabel=<span class=hljs-string >&quot;Angle (°)&quot;</span>)
+
+lines!(ax11, times, rad2deg.(interp[plant.ϕ]))
+hlines!(ax11, [rad2deg(setpoint)], linestyle=:dash)
+
+bracket!(<span class=hljs-number >120</span>, <span class=hljs-number >10</span>, <span class=hljs-number >180</span>, <span class=hljs-number >10</span>, offset=<span class=hljs-number >5</span>, text=<span class=hljs-string >&quot;Inset Area&quot;</span>, style=:square, orientation=:down)
+
+ax12 = Axis(fig1, bbox = BBox(<span class=hljs-number >400</span>, <span class=hljs-number >750</span>, <span class=hljs-number >200</span>, <span class=hljs-number >450</span>))
+
+lines!(ax12, <span class=hljs-number >120</span>:<span class=hljs-number >0.1</span>:<span class=hljs-number >180</span>, rad2deg.(bb_sol(<span class=hljs-number >120</span>:<span class=hljs-number >0.1</span>:<span class=hljs-number >180</span>)[plant.ϕ]))
+hlines!(ax12, [rad2deg(setpoint)], linestyle=:dash)
+
+fig1</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/sac-thrusters/code/bb-sim.svg" alt=""></div> <p>As can be seen in the inset plot, the bang-bang controller causes the spacecraft to oscillate rapidly as it reaches the setpoint. Let&#39;s take a look at the control output from the controller in the 120-180 second time range:</p> <pre><code class="julia hljs">fig2 = Figure()
+ax21 = Axis(fig2[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>], xlabel=<span class=hljs-string >&quot;Time (s)&quot;</span>, ylabel=<span class=hljs-string >&quot;Controller Output&quot;</span>)
+
+lines!(ax21, <span class=hljs-number >120</span>:<span class=hljs-number >0.1</span>:<span class=hljs-number >180</span>, bb_sol(<span class=hljs-number >120</span>:<span class=hljs-number >0.1</span>:<span class=hljs-number >180</span>)[bangbang_controller.ctrl_output.u])
+
+fig2</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/sac-thrusters/code/bb-ss.svg" alt=""></div> <p>The controller output is indeed incredibly oscillatory, causing the thruster to fire and stop incredibly rapidly. This causes a lot of unnecessary fuel usage, as well as the fact that real thrusters probably would not be able to pulse at these high frequencies.</p> <h2 id=bang-bang_with_deadzone_controller ><a href="#bang-bang_with_deadzone_controller" class=header-anchor >Bang-Bang with Deadzone Controller</a></h2> <p>Next, let&#39;s take a look at a bang-bang controller with a deadzone to hopefully alleviate the steady-state oscillations. Let&#39;s define the component for this controller and simulate the same scenario as the previous:</p> <pre><code class="julia hljs"><span class=hljs-meta >@component</span> <span class=hljs-keyword >function</span> BBDZController(; name, thruster_torque, deadzone_α)
+    <span class=hljs-meta >@named</span> ref_signal = B.RealInput()
+    <span class=hljs-meta >@named</span> ctrl_output = B.RealOutput()
+
+    sts = <span class=hljs-meta >@variables</span> ref(t) u(t)
+    ps = <span class=hljs-meta >@parameters</span> thruster_torque=thruster_torque
+
+    eqs = [
+        u ~ (abs(ref) ≥ deadzone_α) * thruster_torque*sign(ref),
+
+        ref ~ ref_signal.u,
+        ctrl_output.u ~ u
+    ]
+
+    compose(
+        ODESystem(eqs, t, sts, ps; name = name), ref_signal, ctrl_output
+    )
+<span class=hljs-keyword >end</span>
+
+α = <span class=hljs-number >0.05</span>
+<span class=hljs-meta >@named</span> bangbangdz_controller = BBDZController(thruster_torque=L*F, deadzone_α=α)
+
+bbdz_sol = simulate_system(bangbangdz_controller; tspan=tspan)
+
+interp_bbdz = bbdz_sol(times)
+
+fig3 = Figure()
+ax31 = Axis(fig3[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>], xlabel=<span class=hljs-string >&quot;Time (s)&quot;</span>, ylabel=<span class=hljs-string >&quot;Angle (°)&quot;</span>)
+
+lines!(ax31, times, rad2deg.(interp_bbdz[plant.ϕ]))
+hlines!(ax31, [rad2deg(setpoint)], linestyle=:dash)
+
+bracket!(<span class=hljs-number >120</span>, <span class=hljs-number >10</span>, <span class=hljs-number >180</span>, <span class=hljs-number >10</span>, offset=<span class=hljs-number >5</span>, text=<span class=hljs-string >&quot;Inset Area&quot;</span>, style=:square, orientation=:down)
+
+ax32 = Axis(fig3, bbox = BBox(<span class=hljs-number >400</span>, <span class=hljs-number >750</span>, <span class=hljs-number >200</span>, <span class=hljs-number >450</span>))
+
+lines!(ax32, <span class=hljs-number >120</span>:<span class=hljs-number >0.1</span>:<span class=hljs-number >180</span>, rad2deg.(bbdz_sol(<span class=hljs-number >120</span>:<span class=hljs-number >0.1</span>:<span class=hljs-number >180</span>)[plant.ϕ]))
+
+hlines!(ax32, [rad2deg(setpoint)], linestyle=:dash)
+
+fig3</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/sac-thrusters/code/bbdz-sim.svg" alt=""></div> <p>As can be seen, there is still some oscillations, as the controller is unable to completely stop the spacecraft from rotating. However, these oscillations are a lot lower frequency, resulting in much less vibration and fuel expenditure. The deadzone parameter <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span> can also be tuned to provide the controller behaviour required.</p> <h2 id=schmitt_trigger ><a href="#schmitt_trigger" class=header-anchor >Schmitt Trigger</a></h2> <p>The Schmitt trigger itself is an electric circuit, however we&#39;ll just be implementing a function that models the behaviour of the trigger. I don&#39;t like the way this is done currently, but it&#39;s the best I can do:</p> <pre><code class="julia hljs">global_switch = <span class=hljs-number >0</span>
+
+<span class=hljs-keyword >function</span> _schmitt_behaviour_model(u, U_on, U_off; total_torque=<span class=hljs-number >1</span>)
+    <span class=hljs-keyword >global</span> global_switch
+
+    clamped_u = clamp(u/total_torque, -<span class=hljs-number >1</span>, <span class=hljs-number >1</span>)
+
+    <span class=hljs-keyword >if</span> sign(clamped_u) &gt; <span class=hljs-number >0</span>
+        <span class=hljs-keyword >if</span> clamped_u ≥ U_on &amp;&amp; global_switch == <span class=hljs-number >0</span>
+            global_switch = <span class=hljs-number >1</span>
+        <span class=hljs-keyword >elseif</span> clamped_u ≤ U_off &amp;&amp; global_switch == <span class=hljs-number >1</span>
+            global_switch = <span class=hljs-number >0</span>
+        <span class=hljs-keyword >end</span>
+    <span class=hljs-keyword >else</span>
+        <span class=hljs-keyword >if</span> clamped_u ≤ -U_on &amp;&amp; global_switch == <span class=hljs-number >0</span>
+            global_switch = -<span class=hljs-number >1</span>
+        <span class=hljs-keyword >elseif</span> clamped_u ≥ -U_off &amp;&amp; global_switch == -<span class=hljs-number >1</span>
+            global_switch = <span class=hljs-number >0</span>
+        <span class=hljs-keyword >end</span>
+    <span class=hljs-keyword >end</span>
+
+    <span class=hljs-keyword >return</span> global_switch
+<span class=hljs-keyword >end</span>
+
+<span class=hljs-meta >@register_symbolic</span> _schmitt_behaviour_model(u, U_on, U_off)</code></pre> <p>We use the <code>@register_symbolic</code> macro to allow for the underlying <code>Symbolics.jl</code> types used in MTK to be used for boolean operations.</p> <p>Next the Schmitt trigger component is defined as:</p> <pre><code class="julia hljs"><span class=hljs-meta >@component</span> <span class=hljs-keyword >function</span> SchmittTrigger(; name, U_on, U_off)
+    <span class=hljs-meta >@named</span> ref_signal = B.RealInput()
+    <span class=hljs-meta >@named</span> ctrl_output = B.RealOutput()
+
+    sts = <span class=hljs-meta >@variables</span> u(t)
+
+    eqs = [
+        u ~ _schmitt_behaviour_model(ref_signal.u, U_on, U_off),
+        ctrl_output.u ~ u
+    ]
+
+    ODESystem(eqs, t, sts, []; systems=[ref_signal, ctrl_output], name = name)
+<span class=hljs-keyword >end</span></code></pre> <p>Simulating and plotting the results of the Schmitt trigger:</p> <pre><code class="julia hljs">U_on = <span class=hljs-number >0.45</span>
+U_off = U_on/<span class=hljs-number >3</span>
+
+<span class=hljs-meta >@named</span> schmitt_trigger = SchmittTrigger(U_on=U_on, U_off=U_off)
+
+st_sol = simulate_system(schmitt_trigger; tspan=tspan, adaptive=<span class=hljs-literal >false</span>, dt=<span class=hljs-number >0.005</span>)
+
+interp_st = st_sol(times)
+
+fig4 = Figure()
+ax41 = Axis(fig4[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>], xlabel=<span class=hljs-string >&quot;Time (s)&quot;</span>, ylabel=<span class=hljs-string >&quot;Angle (°)&quot;</span>)
+
+lines!(ax41, times, rad2deg.(interp_st[plant.ϕ]))
+hlines!(ax41, [rad2deg(setpoint)], linestyle=:dash)
+
+fig4</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/sac-thrusters/code/st-sim.svg" alt=""></div> <h2 id=pseudorate_modulator ><a href="#pseudorate_modulator" class=header-anchor >Pseudorate Modulator</a></h2> <p>Next, we enhance the behaviour of the Schmitt trigger by using it to create the pseudorate modulator:</p> <pre><code class="julia hljs"><span class=hljs-meta >@component</span> <span class=hljs-keyword >function</span> PseudorateModulator(; name, time_constant, filter_gain, U_on, U_off)
+    <span class=hljs-meta >@named</span> ref_signal = B.RealInput()
+    <span class=hljs-meta >@named</span> ctrl_output = B.RealOutput()
+
+    <span class=hljs-meta >@named</span> trigger = SchmittTrigger(U_on=U_on, U_off=U_off)
+    <span class=hljs-meta >@named</span> filter = B.FirstOrder(T=time_constant, k=filter_gain)
+    <span class=hljs-meta >@named</span> feedback = B.Feedback()
+
+    eqs = [
+        connect(ref_signal, feedback.input1),
+        connect(feedback.output, trigger.ref_signal),
+        connect(trigger.ctrl_output, filter.input),
+        connect(trigger.ctrl_output, ctrl_output),
+        connect(filter.output, feedback.input2),
+    ]
+
+    ODESystem(eqs, t, [], []; systems=[trigger, filter, feedback, ref_signal, ctrl_output], name = name)
+<span class=hljs-keyword >end</span></code></pre> <p>Simulating and plotting the results of the pseudorate modulator:</p> <pre><code class="julia hljs">K_m = <span class=hljs-number >4.5</span>
+T_m = <span class=hljs-number >0.85</span>
+
+<span class=hljs-meta >@named</span> prm = PseudorateModulator(time_constant=T_m, filter_gain=K_m, U_on=U_on, U_off=U_off)
+
+prm_sol = simulate_system(prm; tspan=tspan, adaptive=<span class=hljs-literal >false</span>, dt=<span class=hljs-number >0.005</span>)
+
+interp_prm = prm_sol(times)
+
+fig5 = Figure()
+ax51 = Axis(fig5[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>], xlabel=<span class=hljs-string >&quot;Time (s)&quot;</span>, ylabel=<span class=hljs-string >&quot;Angle (°)&quot;</span>)
+
+lines!(ax51, times, rad2deg.(interp_prm[plant.ϕ]))
+hlines!(ax51, [rad2deg(setpoint)], linestyle=:dash)
+
+fig5</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/sac-thrusters/code/prm-sim.svg" alt=""></div> <h2 id=pwpf_modulator ><a href="#pwpf_modulator" class=header-anchor >PWPF Modulator</a></h2> <p>Finally, let&#39;s define the component for our last and hopefully best performing controller, the PWPF modulator:</p> <pre><code class="julia hljs"><span class=hljs-meta >@component</span> <span class=hljs-keyword >function</span> PWPFModulator(; name, time_constant, filter_gain, U_on, U_off)
+    <span class=hljs-meta >@named</span> ref_signal = B.RealInput()
+    <span class=hljs-meta >@named</span> ctrl_output = B.RealOutput()
+
+    <span class=hljs-meta >@named</span> trigger = SchmittTrigger(U_on=U_on, U_off=U_off)
+    <span class=hljs-meta >@named</span> filter = B.FirstOrder(T=time_constant, k=filter_gain)
+    <span class=hljs-meta >@named</span> feedback = B.Feedback()
+
+    eqs = [
+        connect(ref_signal, feedback.input1),
+        connect(feedback.output, filter.input),
+        connect(filter.output, trigger.ref_signal),
+        connect(trigger.ctrl_output, feedback.input2),
+        connect(trigger.ctrl_output, ctrl_output),
+    ]
+
+    ODESystem(eqs, t, [], []; systems=[trigger, filter, feedback, ref_signal, ctrl_output], name = name)
+<span class=hljs-keyword >end</span></code></pre> <p>Simulating and plotting the results of the PWPF modulator:</p> <pre><code class="julia hljs"><span class=hljs-meta >@named</span> pwpf = PWPFModulator(time_constant=T_m, filter_gain=K_m, U_on=U_on, U_off=U_off)
+
+pwpf_sol = simulate_system(pwpf; tspan=tspan, adaptive=<span class=hljs-literal >false</span>, dt=<span class=hljs-number >0.005</span>)
+
+interp_pwpf = pwpf_sol(times)
+
+fig6 = Figure()
+ax61 = Axis(fig6[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>], xlabel=<span class=hljs-string >&quot;Time (s)&quot;</span>, ylabel=<span class=hljs-string >&quot;Angle (°)&quot;</span>)
+
+lines!(ax61, times, rad2deg.(interp_pwpf[plant.ϕ]))
+hlines!(ax61, [rad2deg(setpoint)], linestyle=:dash)
+
+fig6</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/sac-thrusters/code/pwpf-sim.svg" alt=""></div> <h2 id=controller_comparison ><a href="#controller_comparison" class=header-anchor >Controller Comparison</a></h2> <p>Let&#39;s now compare the quite different behaviours of every controller we&#39;ve implemented:</p> <pre><code class="julia hljs">fig7 = Figure()
+ax71 = Axis(fig7[<span class=hljs-number >1</span>,<span class=hljs-number >1</span>], xlabel=<span class=hljs-string >&quot;Time (s)&quot;</span>, ylabel=<span class=hljs-string >&quot;Angle (°)&quot;</span>)
+
+lines!(ax71, times, rad2deg.(interp_pwpf[plant.ϕ]), label=<span class=hljs-string >&quot;PWPF Modulator&quot;</span>)
+lines!(ax71, times, rad2deg.(interp_prm[plant.ϕ]), label=<span class=hljs-string >&quot;Pseudorate Modulator&quot;</span>)
+lines!(ax71, times, rad2deg.(interp_st[plant.ϕ]), label=<span class=hljs-string >&quot;Schmitt Trigger&quot;</span>)
+lines!(ax71, times, rad2deg.(interp_bbdz[plant.ϕ]), label=<span class=hljs-string >&quot;Bang-Bang with Deadzone Controller&quot;</span>)
+lines!(ax71, times, rad2deg.(interp[plant.ϕ]), label=<span class=hljs-string >&quot;Bang-Bang Controller&quot;</span>)
+
+hlines!(ax71, [rad2deg(setpoint)], linestyle=:dash)
+
+axislegend(ax71, position=:rb)
+
+fig7</code></pre> <div class=im-100 ><img src="/starcoffee/assets/posts/sac-thrusters/code/comp-viz.svg" alt=""></div> <h1 id=wrapping_up ><a href="#wrapping_up" class=header-anchor >Wrapping Up</a></h1> <p>In conclusion, we have succesfully simulated various thruster controllers for spacecraft attitude control. Other controllers exist however I selected a handful that are easily able to be simulated using <code>ModelingToolkit.jl</code>, nevertheless controllers such as the pseudorate and PWPF modulators are commonly used. I hoped this post is useful and informative&#33;</p> <p>On another note, I really don&#39;t like the way I had to implement the behaviour model of a Schmitt trigger. If any readers have some suggestions to better implement the behaviour, ideally within the <code>SchmittTrigger</code> component itself, please reach out&#33;</p> <p>Thanks for reading, until next time.</p> <h1 id=footnotes_and_references ><a href="#footnotes_and_references" class=header-anchor >Footnotes and References</a></h1> <p><table class=fndef  id="fndef:1"> <tr> <td class=fndef-backref ><a href="#fnref:1">[1]</a> <td class=fndef-content >&quot;Proportional thrusters, whose fuel valves open a distance proportional to the commanded thrust level, are not employed much in practice. Mechanical considerations prohibit proportional valve operation largely because of dirt particles that prevent complete closure for small valve openings; fuel leakage through the valves consequently produces opposing thruster firings.&quot; B. Wie, &quot;Rotational Maneuvers and Attitude Control&quot; in <em>Space Vehicle Dynamics and Control</em>, 2nd Ed., Reston, VA, USA: American Institute of Aeronautics and Astronautics, Inc., 2008. </table> <table class=fndef  id="fndef:2"> <tr> <td class=fndef-backref ><a href="#fnref:2">[2]</a> <td class=fndef-content >T.D. Krøvel, <a href="https://folk.ntnu.no/tomgra/Diplomer/Krovel.pdf">&quot;Optimal Tuning of PWPF Modulator for Attitude Control,&quot;</a> M.S. thesis, Department of Engineering Cybernetics, Norwegian University of Science and Technology, Trondheim, 2005. </table> </p> <div class=page-foot > <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <a href="https://michaszj.github.io/">Michal Jagodzinski</a>. Last modified: May 29, 2023. <br>Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>. </div> </div> </div> </div> <script src="/starcoffee/libs/highlight/highlight.min.js"></script> <script>hljs.highlightAll();hljs.configure({tabReplace: ' '});</script> <label for=sidebar-checkbox  class=sidebar-toggle ></label>
