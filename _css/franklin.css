@@ -466,6 +466,9 @@ pre code {
   font-size: 2.5rem;
   /* font-weight: 700; */
   margin-bottom: 2rem;
+  line-height: 1;
+  /* display: inline-block;
+  vertical-align: middle; */
 }
 
 .tags-section {
