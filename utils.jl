@@ -151,7 +151,7 @@ function hfun_generate_title(post_file)
     tags = String.(strip_tags_str(post.tags))
 
     for tag in tags
-        tags_section *= "<a href=/tag/$(replace(tag, " "=>"_")) class=tag>$(tag)</a>"
+        tags_section *= "<a href=/tag/$(lowercase(replace(tag, " "=>"_"))) class=tag>$(tag)</a>"
     end
 
     tags_section *= "</div>"
