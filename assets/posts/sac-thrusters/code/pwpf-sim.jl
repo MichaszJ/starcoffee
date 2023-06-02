@@ -1,5 +1,5 @@
 # This file was generated, do not modify it. # hide
-@named pwpf = PWPFModulator(time_constant=T_m, filter_gain=K_m, U_on=U_on, U_off=U_off)
+@named pwpf = PWPFModulator(time_constant=T_m, filter_gain=K_m, U_on=U_on, U_off=U_off, torque=F*L)
 
 pwpf_sol = simulate_system(pwpf; tspan=tspan, adaptive=false, dt=0.005)
 
