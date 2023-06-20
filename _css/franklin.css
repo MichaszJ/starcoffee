@@ -456,6 +456,10 @@ pre code {
   margin-bottom: 19px;
 }
 
+.img-caption .katex {
+  font-size: 14px;
+}
+
 .title-section {
   border-bottom: 1px solid #d1d5db;
   margin-bottom: 2rem;
