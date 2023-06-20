@@ -75,7 +75,7 @@ This program contains Ipopt, a library for large-scale nonlinear optimization.
   Dual objective value : 2.70241e+01
 
 * Work counters
-  Solve time (sec)   : 1.15174e+00
+  Solve time (sec)   : 1.19007e+00
 </code></pre>
 <p>We now have the optimal initial velocity of the projectile in order to minimize the objective function <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msqrt><mrow><msubsup><mi>v</mi><mrow><mi>x</mi><mo separator=true >,</mo><mn>0</mn></mrow><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>v</mi><mrow><mi>y</mi><mo separator=true >,</mo><mn>0</mn></mrow><mn>2</mn></msubsup></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{v_{x,0}^2 + v_{y,0}^2}</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:1.84em;vertical-align:-0.6583em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:1.1817em;"><span class=svg-align  style="top:-3.8em;"><span class=pstrut  style="height:3.8em;"></span><span class=mord  style="padding-left:1em;"><span class=mord ><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.7959em;"><span style="top:-2.4337em;margin-left:-0.0359em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">x</span><span class="mpunct mtight">,</span><span class="mord mtight">0</span></span></span></span><span style="top:-3.0448em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.4024em;"><span></span></span></span></span></span></span><span class=mspace  style="margin-right:0.2222em;"></span><span class=mbin >+</span><span class=mspace  style="margin-right:0.2222em;"></span><span class=mord ><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class=msupsub ><span class="vlist-t vlist-t2"><span class=vlist-r ><span class=vlist  style="height:0.7959em;"><span style="top:-2.4337em;margin-left:-0.0359em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span><span class="mpunct mtight">,</span><span class="mord mtight">0</span></span></span></span><span style="top:-3.0448em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class=vlist-s >​</span></span><span class=vlist-r ><span class=vlist  style="height:0.4024em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.1417em;"><span class=pstrut  style="height:3.8em;"></span><span class=hide-tail  style="min-width:1.02em;height:1.88em;"><svg xmlns="http://www.w3.org/2000/svg" width='400em' height='1.88em' viewBox='0 0 400000 1944' preserveAspectRatio='xMinYMin slice'><path d='M983 90
 l0 -0
@@ -281,7 +281,7 @@ solution_summary(glider_model)</code></pre>
   Dual objective value : 1.10179e+03
 
 * Work counters
-  Solve time (sec)   : 4.39750e+01
+  Solve time (sec)   : 4.70738e+01
 </code></pre>
 <p>Visualizing the state variables over the time period:</p>
 <pre><code class="julia hljs"><span class=hljs-keyword >function</span> plot_opt_variable(fig_ax, y, ylabel)
@@ -309,7 +309,7 @@ fig3</code></pre>
 <h2 id=wrapping_up ><a href="#wrapping_up" class=header-anchor >Wrapping Up</a></h2>
 <p>Thanks for reading&#33; I hope this post was insightful and inspired you to check out using <code>JuMP.jl</code> for optimal control work. I will continue to learn the theory behind optimal control, so expect more posts on this topic soon. Until next time.</p>
 <div class=page-foot >
-    <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <a href="https://michaszj.github.io/">Michal Jagodzinski</a>. Last modified: June 02, 2023.
+    <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <a href="https://michaszj.github.io/">Michal Jagodzinski</a>. Last modified: June 20, 2023.
     <br>Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
 </div>
 </div>
