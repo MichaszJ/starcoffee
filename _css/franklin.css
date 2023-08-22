@@ -443,6 +443,26 @@ pre code {
   width: 75%;
 }
 
+.im-60 {
+  text-align: center;
+}
+.im-60 img {
+  padding: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 60%;
+}
+
+.im-50 {
+  text-align: center;
+}
+.im-50 img {
+  padding: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
 /* code {
   background-color: #f8f8f8 !important;
   border: solid 1px #d9d9d9 !important;
