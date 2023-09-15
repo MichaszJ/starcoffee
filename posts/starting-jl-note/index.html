@@ -1,0 +1,144 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=preconnect  href="https://fonts.googleapis.com"> <link rel=preconnect  href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel=stylesheet > <link rel=stylesheet  href="/starcoffee/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/starcoffee/css/franklin.css"> <link rel=stylesheet  href="/starcoffee/css/poole_lanyon.css"> <link rel=stylesheet  href="/starcoffee/css/adjust.css"> <link rel=icon  href="/starcoffee/assets/favicon.png"> <title>Starting jl-note</title> <input type=checkbox  class=sidebar-checkbox  id=sidebar-checkbox > <div class=sidebar  id=sidebar > <div class=sidebar-item > <p>Star Coffee</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/starcoffee/">Home</a> <a class="sidebar-nav-item " href="/starcoffee/posts/welcome-to-star-coffee/">Welcome to Star Coffee</a> <a class="sidebar-nav-item " href="/starcoffee/posts/projects/">Projects</a> <a class="sidebar-nav-item " href="/starcoffee/posts/satellite-analysis-toolkit/">Satellite Analysis Toolkit</a> <a class="sidebar-nav-item " href="/starcoffee/posts/simple-nn/">Simple NN</a> </nav> <div class=sidebar-item > <p>&copy; Michal Jagodzinski.</p> </div> </div> <!-- Wrap is the content to shift when toggling the sidebar. We wrap the content to avoid any CSS collisions with our real content. --> <div class=wrap > <div class=masthead > <div class=container > <h3 class=masthead-title > <a href="/starcoffee/" title=Home >Star Coffee</a> <small>Writing about stuff, working in public</small> </h3> </div> </div> <div class="container content"> <div class=franklin-content ><div class=title-section><p class=post-title>Starting jl-note</p><div class=tags-section><a href=/starcoffee/tag/blogging class=tag>Blogging</a><a href=/starcoffee/tag/programming class=tag>Programming</a><a href=/starcoffee/tag/julia class=tag>Julia</a></div><p class=post-subtitle>Starting a new project related to literate programming</p><div class=metadata-section><div class=metadata>Author<p>Michal Jagodzinski</p></div><div class=metadata>Published<p>September 12th, 2023</p></div></div></div> <div class=im-100 ><img src="https://source.unsplash.com/an-aerial-view-of-a-rocky-beach-with-clear-blue-water-fOZB5P4DcjM" alt="" /></div> <div class=img-caption >Photo by <a href="https://unsplash.com/photos/an-aerial-view-of-a-rocky-beach-with-clear-blue-water-fOZB5P4DcjM">Liam Gamba</a></div> <div class=franklin-toc ><ol><li><a href="#introduction">Introduction</a><li><a href="#the_code">The Code</a><li><a href="#conclusion">Conclusion</a></ol></div> <h1 id=introduction ><a href="#introduction" class=header-anchor >Introduction</a></h1> <p>Hello and welcome back to Star Coffee. This past week &#40;as of writing&#41; I&#39;ve started working on <code>jl-note</code>, a simple tool for <a href="https://en.wikipedia.org/wiki/Literate_programming">literate programming</a>. It&#39;s a quite simple tool, it reads in the content of a plaintext file that contains blocks of Julia code, evaluates the blocks, and writes their output or value back to the file. </p> <p>This project was heavily inspired by <a href="https://orgmode.org/worg/org-contrib/babel/">Babel for Org</a> which is in general the same idea. However, I had some problems trying to get Babel to work well with Julia code, and I wanted a more lightweight/universal tool than having to use Emacs.</p> <h1 id=the_code ><a href="#the_code" class=header-anchor >The Code</a></h1> <p>The tool is quite simple in its current state, it&#39;s by no means optimized or works super smoothly. It also has to evaluate the code from scratch everytime it&#39;s run, which means waiting for all of the precompilation Julia needs to do &#40;or it can be run in a Julia REPL, which removes the need for precompilation every time it&#39;s run&#41;. I&#39;ll try to tackle these problems and make it a much more streamlined tool, at which point I might open-source it.</p> <p>The heavy lifting in <code>jl-note</code> is done by <code>IOCapture.jl</code>, which captures IO from evaluated Julia code and let&#39;s you access the results. At the moment, this is the only dependency for <code>jl-note</code>:</p> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> IOCapture</code></pre>
+<p>First the script grabs the file path supplied to <code>jl-note</code> via the command line:</p>
+<pre><code class="julia hljs">file_path = <span class=hljs-literal >ARGS</span>[<span class=hljs-number >1</span>]</code></pre>
+<p>Next I defined some <code>struct</code>s to store the contents of a file:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >struct</span> InputChunk
+    content::<span class=hljs-built_in >String</span>
+    is_code::<span class=hljs-built_in >Bool</span>
+<span class=hljs-keyword >end</span>
+
+<span class=hljs-keyword >struct</span> InputFile
+    file_path::<span class=hljs-built_in >String</span>
+    file_contents::<span class=hljs-built_in >Vector</span>{InputChunk}
+<span class=hljs-keyword >end</span></code></pre>
+<p>The <code>InputChunk</code> <code>struct</code> stores a block of text, and denotes whether the text contains Julia code. The <code>InputFile</code> <code>struct</code> simply stores the file path and a vector of <code>InputChunk</code>s. Next I wrote a function to parse a plaintext file and return an <code>InputFile</code>:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >function</span> get_file_chunks(file_path::<span class=hljs-built_in >String</span>)::InputFile
+    file_chunks = InputChunk[]
+
+    reading_code_chunk = <span class=hljs-literal >false</span>
+    code_chunk_start = <span class=hljs-number >0</span>
+    
+    current_chunk = <span class=hljs-string >&quot;&quot;</span>
+
+    <span class=hljs-keyword >for</span> (i, line) <span class=hljs-keyword >in</span> enumerate(eachline(file_path))
+        <span class=hljs-keyword >if</span> (!reading_code_chunk &amp;&amp; !occursin(<span class=hljs-string >&quot;```&quot;</span>, line)) || (reading_code_chunk &amp;&amp; !occursin(<span class=hljs-string >&quot;```&quot;</span>, line))
+            <span class=hljs-keyword >if</span> line != <span class=hljs-string >&quot;\n&quot;</span>
+                current_chunk *= line * &#x27;\n&#x27;
+            <span class=hljs-keyword >end</span>
+        <span class=hljs-keyword >end</span>
+
+        <span class=hljs-keyword >if</span> occursin(<span class=hljs-string >&quot;```&quot;</span>, line) &amp;&amp; !reading_code_chunk
+            <span class=hljs-keyword >if</span> current_chunk != <span class=hljs-string >&quot;&quot;</span>
+                push!(file_chunks, InputChunk(current_chunk, <span class=hljs-literal >false</span>))
+            <span class=hljs-keyword >end</span>
+
+            reading_code_chunk = <span class=hljs-literal >true</span>
+            code_chunk_start = i
+
+            current_chunk = line * &#x27;\n&#x27;
+        
+        <span class=hljs-keyword >elseif</span> reading_code_chunk &amp;&amp; i != code_chunk_start &amp;&amp; occursin(<span class=hljs-string >&quot;```&quot;</span>, line)
+            reading_code_chunk = <span class=hljs-literal >false</span>
+
+            current_chunk *= line * &#x27;\n&#x27;
+
+            <span class=hljs-keyword >if</span> !occursin(<span class=hljs-string >&quot;```STDOUT&quot;</span>, current_chunk) &amp;&amp; !occursin(<span class=hljs-string >&quot;```OUTPUT&quot;</span>, current_chunk)
+                push!(file_chunks, InputChunk(current_chunk, <span class=hljs-literal >true</span>))
+            <span class=hljs-keyword >end</span>
+
+            current_chunk = <span class=hljs-string >&quot;&quot;</span>
+        <span class=hljs-keyword >end</span>
+    <span class=hljs-keyword >end</span>
+    
+    <span class=hljs-keyword >return</span> InputFile(file_path, file_chunks)
+<span class=hljs-keyword >end</span></code></pre>
+<p>I know the code is quite messy, but it works, optimizing comes later. This function basically goes line-by-line through the input file, and splits the file into chunks, alternating between text and code. Next I defined a <code>CodeChunk</code> <code>struct</code> to encode information about the code chunks, and I wrote a function to parse the <code>InputFile</code> to return a <code>Vector&#123;CodeChunk&#125;</code>:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >struct</span> CodeChunk
+    properties::<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >String</span>}
+    chunk::<span class=hljs-built_in >String</span>
+<span class=hljs-keyword >end</span>
+
+<span class=hljs-keyword >function</span> get_code_chunks(input_file::InputFile)::<span class=hljs-built_in >Vector</span>{CodeChunk}
+    filtered = filter((chunk) -&gt; chunk.is_code == <span class=hljs-literal >true</span>, input_file.file_contents)
+
+    <span class=hljs-keyword >return</span> [CodeChunk(<span class=hljs-built_in >String</span>[], replace(chunk.content, <span class=hljs-string >&quot;```julia\n&quot;</span> =&gt; <span class=hljs-string >&quot;&quot;</span>, <span class=hljs-string >&quot;\n```&quot;</span> =&gt; <span class=hljs-string >&quot;&quot;</span>)) <span class=hljs-keyword >for</span> chunk <span class=hljs-keyword >in</span> filtered]
+<span class=hljs-keyword >end</span></code></pre>
+<p>As of yet, I have not implemented any properties for the code chunks, so the <code>properties</code> field is unused, but I included it for now to allow for future development. Now for the interesting part, next is the function that takes a <code>Vector&#123;CodeChunk&#125;</code> and evaluates the code itself, capturing the output using <code>IOCapture.jl</code>:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >function</span> get_io_captures(code_chunks::<span class=hljs-built_in >Vector</span>{CodeChunk})::<span class=hljs-built_in >Vector</span>
+    io_captures = []
+    
+    <span class=hljs-keyword >for</span> chunk <span class=hljs-keyword >in</span> code_chunks
+        parsed_entry = replace(chunk.chunk, <span class=hljs-string >&quot;\n\t&quot;</span> =&gt; <span class=hljs-string >&quot;&quot;</span>, &#x27;\n&#x27; =&gt; <span class=hljs-string >&#x27;;&#x27;</span>)
+
+        io_capture = IOCapture.capture() <span class=hljs-keyword >do</span>
+            eval(Meta.parse(parsed_entry))
+        <span class=hljs-keyword >end</span>
+
+        push!(io_captures, io_capture)
+    <span class=hljs-keyword >end</span>
+
+    <span class=hljs-keyword >return</span> io_captures
+<span class=hljs-keyword >end</span></code></pre>
+<p>This function is pretty simple, it first converts the text into a single line and replaces any newline characters with semicolons, and then the code inside each chunk is evaluated. I do not return a concrete type from this function, because the return type from <code>IOCapture.capture&#40;&#41;</code> is quite complicated and varies depending on the evaluated code. Next we have a function that takes in the <code>InputFile</code> and the <code>Vector</code> from <code>get_io_captures</code>, and inserts the results of the captures after each code block:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >function</span> insert_code_chunks(input_file::InputFile, code_chunks)::<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >String</span>}
+    final_chunks = <span class=hljs-built_in >String</span>[]
+    code_counter = <span class=hljs-number >1</span>
+
+    <span class=hljs-keyword >for</span> chunk <span class=hljs-keyword >in</span> input_file.file_contents
+        push!(final_chunks, chunk.content)
+
+        <span class=hljs-keyword >if</span> chunk.is_code &amp;&amp; code_counter &lt;= length(code_chunks)
+            code_output = <span class=hljs-string >&quot;&quot;</span>
+
+            <span class=hljs-keyword >if</span> code_chunks[code_counter].output != <span class=hljs-string >&quot;&quot;</span>
+                code_output *= <span class=hljs-string >&quot;&quot;&quot;\```STDOUT
+                <span class=hljs-subst >$(code_chunks[code_counter].output)</span>
+                \```
+                &quot;&quot;&quot;</span>
+            <span class=hljs-keyword >end</span>
+
+            <span class=hljs-keyword >if</span> code_chunks[code_counter].value !== <span class=hljs-literal >nothing</span>
+                code_output = <span class=hljs-string >&quot;&quot;&quot;\```OUTPUT
+                <span class=hljs-subst >$(code_chunks[code_counter].value)</span>
+                \```
+                &quot;&quot;&quot;</span>
+            <span class=hljs-keyword >end</span>
+
+            push!(final_chunks, code_output)
+            
+            code_counter += <span class=hljs-number >1</span>;
+        <span class=hljs-keyword >end</span>
+    <span class=hljs-keyword >end</span>
+
+    <span class=hljs-keyword >return</span> final_chunks
+<span class=hljs-keyword >end</span></code></pre>
+<p>This function returns a <code>Vector&#123;String&#125;</code> which contains each chunk of the original file with the results of the Julia code blocks inserted. Please note the &#92; characters in front of each &#96;&#96;&#96; in the function above, I needed to insert the backslashes to not make <code>Franklin.jl</code> crash when writing this blog post. If you&#39;re using this code &#40;please feel free to&#33;&#41; just remove those backslashes. Finally, we come to our last function, the one that puts all of the building blocks together and writes the result to the original file:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >function</span> run_note!(file_path::<span class=hljs-built_in >String</span>)
+    input_file = get_file_chunks(file_path)
+
+    io_captures = get_code_chunks(input_file) |&gt; get_io_captures
+
+    full_string = insert_code_chunks(input_file, io_captures) |&gt; join
+    
+    open(file_path, <span class=hljs-string >&quot;w&quot;</span>) <span class=hljs-keyword >do</span> file
+        write(file, full_string);
+    <span class=hljs-keyword >end</span>
+<span class=hljs-keyword >end</span></code></pre>
+<p>And that&#39;s it &#40;for now&#41;. Running the <code>run_note&#33;</code> function either in the file itself or in the Julia REPL with a supplied <code>file_path</code> results in the script reading the file contents, evaluating any Julia code blocks, and writing the results back to the supplied file. See <a href="https://x.com/astra_kawa/status/1701369995177910407">this tweet of mine to see it in action</a>.</p>
+<h1 id=conclusion ><a href="#conclusion" class=header-anchor >Conclusion</a></h1>
+<p>Thanks for reading this short post&#33; I&#39;m very happy with the progress I made on this project so far, and I&#39;m excited to keep working at it in my free time. I recently found a job working at the Canadian Space Agency so I&#39;m a bit busy these days, but I&#39;d like to find some time every now and again to work on projects and write on this blog.</p>
+<p>I hope you found this project interesting, feel free to use my code and play around with it. If people are interested I&#39;ll try to improve this script and open-source it, but we&#39;ll see what happens. Until next time.</p>
+<div class=page-foot >
+    <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <a href="https://michaszj.github.io/">Michal Jagodzinski</a>. Last modified: September 15, 2023.
+    <br>Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+</div>
+</div>
+      </div>  
+    </div> 
+    
+    
+        <script src="/starcoffee/libs/highlight/highlight.min.js"></script>
+<script>hljs.highlightAll();hljs.configure({tabReplace: '    '});</script>
+
+    
+    <label for=sidebar-checkbox  class=sidebar-toggle ></label>
