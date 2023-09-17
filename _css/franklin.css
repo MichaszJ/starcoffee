@@ -11,7 +11,7 @@
   --block-background: hsl(0, 0%, 97%);
   --output-background: hsl(0, 0%, 93%);
   --small: 10px;
-  --normal: 14px;
+  --normal: 15px;
   --text-color: black;
   --highlight-colour: #FF2E63;
 }
@@ -26,8 +26,9 @@ html {
   /* font-family: "Atkinson Hyperlegible", sans-serif !important; */
   /* font-family: "Inter", sans-serif !important; */
   /* font-family: 'Alegreya Sans Light' !important; */
-  font-family: 'Iosevka Aile Light' !important;
-  /* font-weight: 400; */
+
+  font-family: 'Iosevka Aile Web' !important;
+  font-weight: 300 !important;
   font-size: var(--normal);
   color: var(--text-color) !important;
 }
@@ -351,7 +352,8 @@ body {
 
 code {
   /* font-family: JuliaMono; */
-  font-family: 'Iosevka Light';
+  font-family: 'Iosevka Web';
+  font-weight: 300;
   background-color: var(--block-background) !important;
   padding: 0.1em 0.2em;
   border-radius: 2px;
