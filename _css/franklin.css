@@ -10,10 +10,10 @@
 :root {
   --block-background: hsl(0, 0%, 97%);
   --output-background: hsl(0, 0%, 93%);
-  --small: 13px;
-  --normal: 17px;
+  --small: 10px;
+  --normal: 14px;
   --text-color: black;
-  --highlight-colour: #0e9f6e;
+  --highlight-colour: #FF2E63;
 }
 
 /* ==================================================================
@@ -24,8 +24,10 @@ html {
   /* font-family: "Open Sans", sans-serif !important; */
   /* font-family: "Cormorant Garamond", serif !important; */
   /* font-family: "Atkinson Hyperlegible", sans-serif !important; */
-  font-family: "Inter", sans-serif !important;
-  font-weight: 300;
+  /* font-family: "Inter", sans-serif !important; */
+  /* font-family: 'Alegreya Sans Light' !important; */
+  font-family: 'Iosevka Aile Light' !important;
+  /* font-weight: 400; */
   font-size: var(--normal);
   color: var(--text-color) !important;
 }
@@ -348,7 +350,8 @@ body {
 ================================================================== */
 
 code {
-  font-family: JuliaMono;
+  /* font-family: JuliaMono; */
+  font-family: 'Iosevka Light';
   background-color: var(--block-background) !important;
   padding: 0.1em 0.2em;
   border-radius: 2px;
@@ -463,14 +466,43 @@ pre code {
 
 .img-caption {
   color: #808080;
-  /* text-align: center; */
   margin-top: -10px;
-  font-size: 14px;
+  font-size: 12px;
   margin-bottom: 19px;
 }
 
+.img-caption-50 {
+  color: #808080;
+  margin-top: -10px;
+  font-size: 12px;
+  margin-bottom: 19px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.img-caption-60 {
+  color: #808080;
+  margin-top: -10px;
+  font-size: 12px;
+  margin-bottom: 19px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 60%;
+}
+
+.img-caption-75 {
+  color: #808080;
+  margin-top: -10px;
+  font-size: 12px;
+  margin-bottom: 19px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
+}
+
 .img-caption .katex {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .title-section {
@@ -510,7 +542,7 @@ a.tag {
 }
 
 .metadata {
-  color: #27a573;
+  color: var(--highlight-colour);
 }
 
 .metadata p {

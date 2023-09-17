@@ -48,7 +48,7 @@ body {
 }
 
 html {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
   /* font-size: 18px; */
   line-height: 1.5;
 }
@@ -297,7 +297,7 @@ h6 {
  */
 
 .container {
-  max-width: 42rem;
+  max-width: 50rem;
 }
 
 /* @media (min-width: 40rem) {
@@ -342,7 +342,7 @@ h6 {
   letter-spacing: 0;
 }
 
-@media (max-width: 48rem) {
+@media (max-width: 50rem) {
   .masthead-title {
     text-align: center;
   }
