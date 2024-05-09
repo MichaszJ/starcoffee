@@ -1,1 +1,1 @@
-"/home/runner/work/starcoffee/starcoffee/__site/assets/posts/the-direct-shooting-method/code/output/shooting-trajectories.svg"
+nothing

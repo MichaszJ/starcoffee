@@ -13,4 +13,4 @@
   Dual objective value : 1.10179e+03
 
 * Work counters
-  Solve time (sec)   : 6.91278e+01
+  Solve time (sec)   : 4.73024e+01
